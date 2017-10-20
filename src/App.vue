@@ -1,96 +1,153 @@
 <template>
-  <div id="app"> 
-
-    <div class="topnav">
-      <a href="#/">Intro</a>
-      <a href="#/bar">Books</a>
-      <a href="#">Link</a> 
+  <div id="app" class="container">
+    <div class="page-header">
+      <h1>Vue.js 2 & Firebase <small>Sample Application by CodingTheSmartWay.com</small></h1>
     </div>
-
-    <div class="content">
-      <h2>CSS Template</h2>
-      <p>A topnav, content and a footer.</p>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Add New Books</h3>
+      </div>
+      <div class="panel-body">
+         <form id="form" class="form-inline" v-on:submit.prevent="addBook">
+          <div class="form-group">
+            <label for="bookTitle">Title:</label>
+            <input type="text" id="bookTitle" class="form-control" v-model="newBook.title">
+          </div>
+          <div class="form-group">
+            <label for="bookAuthor">Author:</label>
+            <input type="text" id="bookAuthor" class="form-control" v-model="newBook.author">
+          </div>
+          <div class="form-group">
+            <label for="bookUrl">Url:</label>
+            <input type="text" id="bookUrl" class="form-control" v-model="newBook.url">
+          </div>
+          <input type="submit" class="btn btn-primary" value="Add Book">
+        </form>
+      </div>
     </div>
-
-
-    <img src="./assets/logo.png">
-    <br>
-    <br>
-    <br>
-    <br>
-    <a>bye</a>
-    <br>
-    <router-view/>
-
-
-    <div class="footer">
-      <p>Footer</p>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Book List</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="book in booksFB" :key="book.key">
+              <td><a v-bind:href="book.url">{{book.title}}</a></td>
+              <td>{{book.author}}</td>
+              <td><span class="fa fa-trash" aria-hidden="true" v-on:click="removeBook(book)"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
-
 <script>
-  export default {
-      name: 'app'
+
+// Initialize Firebase
+var config = {
+    apiKey: "AIzaSyAVZsubeql5nwSz5vq4CkqUcrT0FOXN-YY",
+    authDomain: "bookexchange-beirut.firebaseapp.com",
+    projectId: "bookexchange-beirut"
+};
+
+const firebase = require("firebase");
+// Required for side-effects
+require("firebase/firestore");
+firebase.initializeApp(config);
+var db = firebase.firestore();
+
+var componentData = {
+    booksFB: [],
+    newBook: {
+          title: '',
+          author: '',
+          url: 'http://'
+    }
+};
+
+export default {
+  name: 'app',
+  data () {
+      return componentData;
+  },
+  
+   methods: {
+      addBook: function () {
+	  var self = this;
+	  db.collection("books").add(self.newBook)
+	      .then(function(docRef) {
+		  self.newBook.title = '';
+		  self.newBook.author = '';
+		  self.newBook.url = 'http://';
+		  console.log("Document written with ID: ", docRef.id);
+	      })
+	      .catch(function(error) {
+		  console.error("Error adding document: ", error);
+	      });
+      },
+       removeBook: function (book) {
+	   db.collection("books").doc(book.key).delete().then(function() {
+	       console.log("Document successfully deleted!");
+	   }).catch(function(error) {
+	       console.error("Error removing document: ", error);
+	   });
+       }
+   }
+}
+
+
+db.collection("books")
+    .onSnapshot(function(snapshot) {
+        snapshot.docChanges.forEach(function(change) {
+	    let dt = change.doc.data();
+	    let key = change.doc.id;
+
+	    dt.key = key;
+            if (change.type === "added") {
+		componentData.booksFB.push(dt);
+                console.log("New: ", key);
+            } else {
+		let index = indexForKey (componentData.booksFB, key);
+		if (change.type === "modified") {
+		    /*Can't use indexing as Vue will not trigger*/
+		    componentData.booksFB.splice(index,1,dt);
+                    console.log("Modified : ", key);
+		} else {
+		    if (change.type === "removed") {
+			componentData.booksFB.splice(index,1 );
+			console.log("Removed: ", key);
+		    }
+		}
+
+	    }
+        });
+    });
+/**
+ * Find the index for an object with given key.
+ *
+ * @param {array} array
+ * @param {string} key
+ * @return {number}
+ */
+function indexForKey (array, key) {
+  for (var i = 0; i < array.length; i++) {
+    if (array[i].key === key) {
+      return i
+    }
   }
+}
 </script>
 
-
-<style>
-#app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-     -webkit-font-smoothing: antialiased;
-     -moz-osx-font-smoothing: grayscale;
-     text-align: center;
-     color: #2a6db0;
-     //margin-top: 60px;
-  }
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-}
-
-/* Style the top navigation bar */
-.topnav {
-    overflow: hidden;
-    background-color: #333;
-    position: fixed;
-    top: 0;
-    width: 100%;
-}
-
-/* Style the topnav links */
-.topnav a {
-    float: left;
-    display: block;
-    color: #f2f2f2;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-
-/* Change color on hover */
-.topnav a:hover {
-    background-color: #ddd;
-    color: black;
-}
-
-/* Style the content */
-.content {
-    background-color: #ddd;
-    padding-top: 40px;
-    height: 200px; /* Should be removed. Only for demonstration */
-}
-
-/* Style the footer */
-.footer {
-    background-color: #f1f1f1;
-    padding: 10px;
-}
-
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
 
 </style>
