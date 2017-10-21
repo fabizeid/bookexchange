@@ -1,8 +1,18 @@
 <template>
   <div id="app" class="container">
     <div class="page-header">
-      <h1>Vue.js 2 & Firebase <small>Sample Application by CodingTheSmartWay.com</small></h1>
+      <h1>Beirut Book Exchange</h1>
     </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Sign In</h3>
+      </div>
+      <div class="panel-body">
+	<button type="button" class="btn btn-secondary" v-on:click="toggleSignIn()">{{signInMessage}}</button>
+      </div>
+    </div>
+
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Add New Books</h3>
@@ -62,10 +72,12 @@ var config = {
 const firebase = require("firebase");
 // Required for side-effects
 require("firebase/firestore");
+require("firebase/auth");
 firebase.initializeApp(config);
 var db = firebase.firestore();
 
 var componentData = {
+    signInMessage: 'Sign',
     booksFB: [],
     newBook: {
           title: '',
@@ -82,7 +94,7 @@ export default {
   
    methods: {
       addBook: function () {
-	  var self = this;
+	  let self = this;	  
 	  db.collection("books").add(self.newBook)
 	      .then(function(docRef) {
 		  self.newBook.title = '';
@@ -100,9 +112,56 @@ export default {
 	   }).catch(function(error) {
 	       console.error("Error removing document: ", error);
 	   });
+       },
+       toggleSignIn: function() {
+	   /*https://github.com/firebase/quickstart-js/blob/master/auth/google-popup.html*/
+	   if (!firebase.auth().currentUser) {
+	       /*Sign in*/
+	       let provider = new firebase.auth.GoogleAuthProvider();
+	       firebase.auth().signInWithPopup(provider).then(function(result) {		   
+		   console.log("sign in: ", result);
+	       }).catch(function(error) {
+		   console.error("Error sign in: ", error);
+	       }); 
+	   } else {
+	       /*Sign Out*/
+	       firebase.auth().signOut().then(function() {
+		   console.log("signed out");
+	       }).catch(function(error) {
+		   console.error("Error sign out: ", error);
+	       });
+	   }
        }
    }
 }
+
+
+/*consider init app in window.onload if will be manipulating DOM 
+ see: https://stackoverflow.com/questions/20180251/when-to-use-window-onload
+ window.onload = function() {
+      initApp();
+    };
+*/
+
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        // User is signed in.
+        let displayName = user.displayName;
+        let email = user.email;
+        let emailVerified = user.emailVerified;
+        let photoURL = user.photoURL;
+        let isAnonymous = user.isAnonymous;
+        let uid = user.uid;
+        let providerData = user.providerData;
+	componentData.signInMessage = 'Sign Out';
+	console.log(" state changed signed in");
+    } else {
+        // User is signed out.
+	componentData.signInMessage = 'Sign In';
+	console.log(" state changed signed out");
+    }
+});
+
 
 
 db.collection("books")
@@ -139,7 +198,7 @@ db.collection("books")
  * @return {number}
  */
 function indexForKey (array, key) {
-  for (var i = 0; i < array.length; i++) {
+  for (let i = 0; i < array.length; i++) {
     if (array[i].key === key) {
       return i
     }
