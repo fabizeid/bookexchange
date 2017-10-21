@@ -6,7 +6,7 @@
 
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Sign In</h3>
+        <h3 class="panel-title">{{displayName}}</h3>
       </div>
       <div class="panel-body">
 	<button type="button" class="btn btn-secondary" v-on:click="toggleSignIn()">{{signInMessage}}</button>
@@ -78,6 +78,7 @@ var db = firebase.firestore();
 
 var componentData = {
     signInMessage: 'Sign',
+    displayName: 'Hello',
     booksFB: [],
     newBook: {
           title: '',
@@ -154,10 +155,13 @@ firebase.auth().onAuthStateChanged(function(user) {
         let uid = user.uid;
         let providerData = user.providerData;
 	componentData.signInMessage = 'Sign Out';
+	componentData.displayName = 'Hello ' + displayName;
+
 	console.log(" state changed signed in");
     } else {
         // User is signed out.
 	componentData.signInMessage = 'Sign In';
+	componentData.displayName = 'Hello';
 	console.log(" state changed signed out");
     }
 });
