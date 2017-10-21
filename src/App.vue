@@ -177,6 +177,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         // User is signed out.
 	if (unsubscribe) {
 	    unsubscribe();
+	    componentData.booksFB = [];
 	    unsubscribe = null
 	}
 	componentData.signInMessage = 'Sign In';
