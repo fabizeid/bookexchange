@@ -12,7 +12,16 @@
 	<button type="button" class="btn btn-secondary" v-on:click="toggleSignIn()">{{signInMessage}}</button>
       </div>
     </div>
-
+    <div class="panel panel-default" v-if="!signedIn">
+      <div class="panel-heading">
+        <h3 class="panel-title">Intro</h3>
+      </div>
+      <div class="panel-body">
+	<a>Welcome to Beirut Book Exchange</a>
+	<a>Please sign in</a>
+      </div>
+    </div>
+    <div v-if="signedIn">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Add New Books</h3>
@@ -58,6 +67,7 @@
         </table>
       </div>
     </div>
+    </div>
   </div>
 </template>
 <script>
@@ -78,6 +88,7 @@ var db = firebase.firestore();
 
 var componentData = {
     signInMessage: 'Sign',
+    signedIn: false, 
     displayName: 'Hello',
     booksFB: [],
     newBook: {
@@ -142,7 +153,10 @@ export default {
  window.onload = function() {
       initApp();
     };
+//validation: https://vuejs.org/v2/examples/firebase.html
 */
+
+var unsubscribe = null;
 
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
@@ -156,19 +170,25 @@ firebase.auth().onAuthStateChanged(function(user) {
         let providerData = user.providerData;
 	componentData.signInMessage = 'Sign Out';
 	componentData.displayName = 'Hello ' + displayName;
-
+	componentData.signedIn = true;
+	if(!unsubscribe) unsubscribe = loadDb();
 	console.log(" state changed signed in");
     } else {
         // User is signed out.
+	if (unsubscribe) {
+	    unsubscribe();
+	    unsubscribe = null
+	}
 	componentData.signInMessage = 'Sign In';
 	componentData.displayName = 'Hello';
+	componentData.signedIn = false;
 	console.log(" state changed signed out");
     }
 });
 
 
-
-db.collection("books")
+function loadDb () {
+return db.collection("books")
     .onSnapshot(function(snapshot) {
         snapshot.docChanges.forEach(function(change) {
 	    let dt = change.doc.data();
@@ -194,6 +214,7 @@ db.collection("books")
 	    }
         });
     });
+}
 /**
  * Find the index for an object with given key.
  *
