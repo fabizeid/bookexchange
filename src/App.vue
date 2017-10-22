@@ -85,7 +85,7 @@ require("firebase/firestore");
 require("firebase/auth");
 firebase.initializeApp(config);
 var db = firebase.firestore();
-
+let uid = null;
 var componentData = {
     signInMessage: 'Sign',
     signedIn: false, 
@@ -107,6 +107,9 @@ export default {
    methods: {
       addBook: function () {
 	  let self = this;	  
+	  /*since ownerID was added here, it will not be reactive
+	  this is ok since we don't need it to trigger*/
+	  self.newBook.ownerID = uid;
 	  db.collection("books").add(self.newBook)
 	      .then(function(docRef) {
 		  self.newBook.title = '';
@@ -166,7 +169,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         let emailVerified = user.emailVerified;
         let photoURL = user.photoURL;
         let isAnonymous = user.isAnonymous;
-        let uid = user.uid;
+        uid = user.uid;
         let providerData = user.providerData;
 	componentData.signInMessage = 'Sign Out';
 	componentData.displayName = 'Hello ' + displayName;
@@ -177,12 +180,13 @@ firebase.auth().onAuthStateChanged(function(user) {
         // User is signed out.
 	if (unsubscribe) {
 	    unsubscribe();
-	    componentData.booksFB = [];
 	    unsubscribe = null
 	}
+	componentData.booksFB = [];
 	componentData.signInMessage = 'Sign In';
 	componentData.displayName = 'Hello';
 	componentData.signedIn = false;
+	uid = null;
 	console.log(" state changed signed out");
     }
 });
