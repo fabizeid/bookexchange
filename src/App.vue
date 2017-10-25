@@ -60,11 +60,10 @@
           <tbody>
             <tr v-for="book in booksFB" :key="book.key">
               <td><a v-bind:href="book.url">{{book.title}}</a></td>
-              <td class="editable">{{book.author}}</td>
+              <td class="editable" :data-f-key="book.key" data-f-field="author">{{book.author}}</td>
               <td>
 		<span class="fa fa-trash" aria-hidden="true" v-on:click="removeBook(book)"></span>
 		<span class="fa fa-pencil" aria-hidden="true" onclick="editMe(this)"></span> 
-		<!--<span class="fa fa-pencil" aria-hidden="true" onclick="(function (a){console.log(this);})(this)"></span>-->
 	      </td>
             </tr>
           </tbody>
@@ -273,6 +272,15 @@ function validate(e) {
 	let element = e.target;
 	e.preventDefault();
 	if(k === 13) {
+	    let docKey = element.getAttribute("data-f-key");
+	    let fieldName = element.getAttribute("data-f-field");
+	    console.log(docKey,fieldName);
+	    db.collection("books").doc(docKey).set(
+		{[fieldName]: element.innerText}, { merge: true }).then(function() {
+		    console.log("Document successfully set!");
+		}).catch(function(error) {
+		  console.error("Error setting document: ", error);
+		});
 	} else { //k  === 27
 	    element.innerText = element.getAttribute("data-beirut-oldvalue");
 	}
