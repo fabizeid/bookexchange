@@ -60,8 +60,12 @@
           <tbody>
             <tr v-for="book in booksFB" :key="book.key">
               <td><a v-bind:href="book.url">{{book.title}}</a></td>
-              <td>{{book.author}}</td>
-              <td><span class="fa fa-trash" aria-hidden="true" v-on:click="removeBook(book)"></span></td>
+              <td class="editable">{{book.author}}</td>
+              <td>
+		<span class="fa fa-trash" aria-hidden="true" v-on:click="removeBook(book)"></span>
+		<span class="fa fa-pencil" aria-hidden="true" onclick="editMe(this)"></span> 
+		<!--<span class="fa fa-pencil" aria-hidden="true" onclick="(function (a){console.log(this);})(this)"></span>-->
+	      </td>
             </tr>
           </tbody>
         </table>
@@ -234,6 +238,50 @@ function indexForKey (array, key) {
     }
   }
 }
+
+
+/*
+To use persistent variables I could use closures 
+or properties as described in
+https://stackoverflow.com/questions/1535631/static-variables-in-javascript
+
+
+Defining in global space (window members) so that it could be found by onclick event. 
+Did not use v-on click since I don't want vue to make the editable 
+variable reactive. Also could not add an event listener on all rows
+of table since table is dynamic.
+*/
+function editMe(element) {
+    /*taverse tree sidewase and assign to all siblings with editable attribute*/
+    //.classList.remove("form-control");
+    let rowElms = element.parentElement.parentElement.querySelectorAll(".editable");
+    let currentElem;
+    for (let i=0 ; i < rowElms.length;i++) {
+	currentElem = rowElms[i]; 
+	currentElem.classList.add("form-control");
+	currentElem.setAttribute("contenteditable", "true");
+	currentElem.addEventListener("keydown", validate);
+	currentElem.setAttribute("data-beirut-oldvalue",currentElem.innerText);
+    }
+}
+window.editMe = editMe;
+
+function validate(e) {
+
+    let k = e.keyCode;
+    if (k === 13 || k === 27){
+	let element = e.target;
+	e.preventDefault();
+	if(k === 13) {
+	} else { //k  === 27
+	    element.innerText = element.getAttribute("data-beirut-oldvalue");
+	}
+	element.removeEventListener("keydown", validate);
+	element.setAttribute("contenteditable", "false");
+	element.classList.remove("form-control");
+    }
+}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
