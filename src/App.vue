@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <b-navbar toggleable="md" type="dark" variant="dark">
+     <!-- <b-navbar toggleable="md" variant="light"> -->
       <b-nav-toggle target="nav_collapse"></b-nav-toggle>
       <b-navbar-brand href="#">Beirut Book Exchange</b-navbar-brand>
       

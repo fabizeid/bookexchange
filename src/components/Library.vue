@@ -1,56 +1,39 @@
 <template>
-  <div class="library">
+  <!--<div class="library">-->
+  <b-container>
     <div v-if="signedIn">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Add New Books</h3>
-      </div>
-      <div class="panel-body">
-         <form id="form" class="form-inline" v-on:submit.prevent="addBook">
-          <div class="form-group">
-            <label for="bookTitle">Title:</label>
-            <input type="text" id="bookTitle" class="form-control" v-model="newBook.title">
-          </div>
-          <div class="form-group">
-            <label for="bookAuthor">Author:</label>
-            <input type="text" id="bookAuthor" class="form-control" v-model="newBook.author">
-          </div>
-          <div class="form-group">
-            <label for="bookUrl">Url:</label>
-            <input type="text" id="bookUrl" class="form-control" v-model="newBook.url">
-          </div>
-          <input type="submit" class="btn btn-primary" value="Add Book">
-        </form>
-      </div>
+    <b-row>
+      <b-col class="my-5" v-if="false">
+        <h3>Add New Books</h3>
+        <b-form id="form"  inline v-on:submit.prevent="addBook">
+	  <b-form-group id="bookTitle" label="Title:" horizontal label-for="bookTitle">
+	    <b-form-input type="text" v-model="newBook.title"></b-form-input>
+	  </b-form-group>
+	  <b-form-group label="Author:" horizontal label-for="bookAuthor">
+	    <b-form-input type="text" id="bookAuthor" v-model="newBook.author"></b-form-input>
+	  </b-form-group>
+	  <b-form-group label="Url:" horizontal label-for="bookUrl">
+	    <b-form-input type="text" id="bookUrl" v-model="newBook.url"></b-form-input>
+	  </b-form-group>
+	  <b-button class="mt-2" type="submit">Add Book</b-button>
+        </b-form>
+      </b-col>
+      <div class="w-100"></div>
+    <b-col class="mt-5">
+
+      <h1 id="bookTitle">Book List</h1>
+      <b-form-input class="w-50 my-2 ml-auto" v-model="filter" placeholder="Type to Search" />
+      <!--class="table-fixed" striped hover --> 
+      <b-table 
+	       class="table-fixed" striped hover
+	       :items="booksFB" 
+	       :fields="fields"
+	       :filter="filter"
+	       ></b-table>
+    </b-col>
+    </b-row>
     </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Book List</h3>
-      </div>
-      <div class="panel-body">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Author</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="book in booksFB" :key="book.key">
-              <td><a v-bind:href="book.url">{{book.title}}</a></td>
-              <td class="editable" :data-f-key="book.key" data-f-field="author">{{book.author}}</td>
-              <td>
-		<span class="fa fa-trash" aria-hidden="true" v-on:click="removeBook(book)"></span>
-		<span class="fa fa-pencil" aria-hidden="true" onclick="editMe(this)"></span> 
-	      </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    </div>
-  </div>
+  </b-container>
 </template>
 
 <script>
@@ -65,6 +48,20 @@ var componentData = {
     signInMessage: 'Login',
     signedIn: false, 
     booksFB: [],
+    filter: null,
+    fields: [
+	{
+	    key: 'title',
+	    label: 'Title',
+	    class: 'col-6'
+	},
+	{
+	    key: 'author',
+	    label: 'Author',
+	    sortable: true,
+	    class: 'col-6'
+	}
+    ],
     newBook: {
           title: '',
           author: '',
@@ -217,6 +214,7 @@ variable reactive. Also could not add an event listener on all rows
 of table since table is dynamic.
 */
 function editMe(element) {
+    console.log(element);
     /*taverse tree sidewase and assign to all siblings with editable attribute*/
     //.classList.remove("form-control");
     let rowElms = element.parentElement.parentElement.querySelectorAll(".editable");
@@ -258,7 +256,56 @@ function validate(e) {
 
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<!-- Scoped style did not affect table
+   following style is needed to have a scrollable table with fixed header
+  PS: don't forget to adjust the col class for the fields-->
+
+<style>
+.table-fixed {
+    width: 100%;
+    /*background-color: #f3f3f3;*/
+}
+.table-fixed tbody {
+  height: 200px;
+  overflow-y: auto;
+  width: 100%;
+ /*  background-color: yellow;*/
+}
+
+.table-fixed thead, .table-fixed tbody , .table-fixed tr, .table-fixed td, .table-fixed th{
+  display: block;
+}
+
+.table-fixed tbody td {
+  float: left;
+}
+ .table-fixed thead > tr> th {
+     float:left;
+    /* background-color: #f3f3f3;
+     background-color: #f39c12;
+     border-color:#e67e22;*/
+}
 
 </style>
+
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+/* force input to be within parent's bounds */
+    form input {
+        max-width: 100%;
+	/*background-color: yellow;*/
+    } 
+
+#bookTitle {
+    -ms-transform: rotate(20deg); /* IE 9 */
+    -webkit-transform: rotate(20deg); /* Safari */
+    transform: rotate(20deg); /* Standard syntax */
+    font-family: "Tangerine";
+    font-weight: 600;
+    text-shadow: 4px 4px 4px #aaa;
+    width: fit-content;
+}
+
+</style>
+

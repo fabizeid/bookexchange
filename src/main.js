@@ -6,7 +6,8 @@ import App from './App'
 //import Vtabl from '@/components/Vtabl'
 
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import 'bootstrap/dist/css/bootstrap.css'
+//import 'bootstrap/dist/css/bootstrap.css'
+import '../scss/custom.scss'
 import 'font-awesome/css/font-awesome.min.css'
 
 // import VueFire from 'vuefire'
