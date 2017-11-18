@@ -1,7 +1,7 @@
 <template>
   <!--<div class="library">-->
   <b-container>
-    <div v-if="signedIn">
+    <div v-if="computedSignedIn">
     <b-row>
       <b-col class="my-5" v-if="false">
         <h3>Add New Books</h3>
@@ -23,9 +23,8 @@
 
       <h1 id="bookTitle">Book List</h1>
       <b-form-input class="w-50 my-2 ml-auto" v-model="filter" placeholder="Type to Search" />
-      <!--class="table-fixed" striped hover --> 
       <b-table 
-	       class="table-fixed" striped hover
+	       class="table-fixed"
 	       :items="booksFB" 
 	       :fields="fields"
 	       :filter="filter"
@@ -41,6 +40,8 @@
  for some reason data will not be reactive
 */
 import Vue from 'vue'
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
+import PerfectScrollbar from 'perfect-scrollbar';
 
 var db = null;
 let uid = null;
@@ -113,7 +114,35 @@ export default {
 	       console.error("Error removing document: ", error);
 	   });
        }
-   }
+   },
+    computed: {
+	//Needed to make sure scrollbar is added after
+	//DOM inside the v-if is created
+	computedSignedIn: function(){
+	    this.$nextTick(function () {
+	    // Code that will run only after the
+	    // entire view has been rendered
+		if (this.signedIn){
+		    //https://github.com/utatti/perfect-scrollbar
+		    var ps = new PerfectScrollbar('table tbody');
+		}
+	    })
+	    return this.signedIn;
+	}
+    },
+    mounted(){
+	//this.$nextTick(function () {
+	    // Code that will run only after the
+	    // entire view has been rendered
+	//    console.log('mounter next tick');
+	//})
+	//console.log('add class');
+	//debugger;
+	//document.getElementById("div1")
+	//document.querySelector(".b-table tbody").className += " otherclass";
+	//var ps = new PerfectScrollbar('table tbody');
+    }
+
 }
 
 
@@ -229,6 +258,7 @@ function editMe(element) {
 }
 window.editMe = editMe;
 
+
 function validate(e) {
 
     let k = e.keyCode;
@@ -258,18 +288,18 @@ function validate(e) {
 
 <!-- Scoped style did not affect table
    following style is needed to have a scrollable table with fixed header
-  PS: don't forget to adjust the col class for the fields-->
+  PS: don't forget to adjust the col class for the fields
+  Essentially by changing the display to block and using the col classes
+  for the items, we are not using a table anymore but bootstrap grids-->
 
 <style>
 .table-fixed {
     width: 100%;
-    /*background-color: #f3f3f3;*/
 }
 .table-fixed tbody {
   height: 200px;
-  overflow-y: auto;
   width: 100%;
- /*  background-color: yellow;*/
+  position: relative; /*needed by scroller*/
 }
 
 .table-fixed thead, .table-fixed tbody , .table-fixed tr, .table-fixed td, .table-fixed th{
@@ -281,9 +311,6 @@ function validate(e) {
 }
  .table-fixed thead > tr> th {
      float:left;
-    /* background-color: #f3f3f3;
-     background-color: #f39c12;
-     border-color:#e67e22;*/
 }
 
 </style>
