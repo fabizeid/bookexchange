@@ -23,12 +23,16 @@
 
       <h1 id="bookTitle">Book List</h1>
       <b-form-input class="w-50 my-2 ml-auto" v-model="filter" placeholder="Type to Search" />
-      <b-table 
-	       class="table-fixed"
+      <b-table class="table-fixed"
 	       :items="booksFB" 
 	       :fields="fields"
 	       :filter="filter"
 	       ></b-table>
+      <div v-if="!booksFB.length" style="position:absolute;top:50%;left:50%"> 
+	<i  class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+	<br/>
+	<a>Loading...</a>
+      </div>
     </b-col>
     </b-row>
     </div>
