@@ -23,7 +23,8 @@
 
       <h1 id="bookTitle">Book List</h1>
       <b-form-input class="w-50 my-2 ml-auto" v-model="filter" placeholder="Type to Search" />
-      <b-table class="table-fixed"
+      <b-table v-on:input="rowsUpdated"
+	       class="table-fixed"
 	       :items="booksFB" 
 	       :fields="fields"
 	       :filter="filter"
@@ -117,6 +118,14 @@ export default {
 	   }).catch(function(error) {
 	       console.error("Error removing document: ", error);
 	   });
+       },
+       rowsUpdated: function(){
+	   if (this.pScroll) {
+	       this.$nextTick(function(){
+		   //console.log('after adding scroll');
+		   this.pScroll.update();
+		   })
+	   }
        }
    },
     computed: {
@@ -128,7 +137,8 @@ export default {
 	    // entire view has been rendered
 		if (this.signedIn){
 		    //https://github.com/utatti/perfect-scrollbar
-		    var ps = new PerfectScrollbar('table tbody');
+		    //console.log('init scrollbar');
+		    this.pScroll = new PerfectScrollbar('table tbody');
 		}
 	    })
 	    return this.signedIn;
