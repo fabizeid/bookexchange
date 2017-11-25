@@ -1,3 +1,18 @@
+
+$body-bg: #afbdc6;
+$dropdown-bg: darken($body-bg,10%);
+$input-bg: lighten($body-bg,10%);
+@import "node_modules/bootstrap/scss/bootstrap";
+
+
+
+
+
+/******************************************************88
+*
+* Fancy css with img background
+*
+***********************************************************
 //From http://s3.amazonaws.com/wrapbootstrap/live/products/600x375/WB072S837.png
 // From http://hakayaatdar.wixsite.com/hakaya
 $body-bg: #414141; //#252830;//#414141;
@@ -54,3 +69,4 @@ body {
 //    font-weight: 600;
 //    text-shadow: 4px 4px 4px #aaa;
 }
+*/
