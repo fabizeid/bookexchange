@@ -10,6 +10,7 @@ $lighter: lighten($body-bg,10%);
 $darker: darken($body-bg,10%);
 $darktransp: rgba(#000,.2);
 $input-bg: $darktransp;//$lighter; //#434857;
+$input-disabled-bg: $input-bg;
 $input-color: #fff;
 $input-placeholder-color: lighten($body-bg,40%);
 $border-color: $lighter;
@@ -17,7 +18,8 @@ $table-border-color: $border-color;
 $table-bg: rgba(5,5,5,.31);//$darktransp;
 $table-head-bg: rgba(131,114,68,.69);
 $table-head-color: rgb(220, 200, 164);
-
+$card-bg: $table-bg;
+$dropdown-bg: rgba(50,50,50,1);
 
 @import "node_modules/bootstrap/scss/functions";
 @import "node_modules/bootstrap/scss/variables";
