@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <b-navbar toggleable="md" type="dark" variant="dark">
-     <!-- <b-navbar toggleable="md" variant="light"> -->
+    <b-navbar fixed="top" toggleable="md" type="dark" variant="dark">
       <b-nav-toggle target="nav_collapse"></b-nav-toggle>
-      <b-navbar-brand href="#">Beirut Book Exchange</b-navbar-brand>
+      <b-navbar-brand>
+	<!-- <b-img :src="require('./assets/logo.png')" /> -->
+	<img src='./assets/read.svg' />
+	<!-- Beirut Book Exchange -->
+      </b-navbar-brand>
       
       <b-collapse is-nav id="nav_collapse">
 
@@ -14,6 +17,7 @@
 	<LoginButton></LoginButton>
       </b-collapse>
     </b-navbar>
+    <div class="my-4 pb-3"/>
     <router-view/>
   </div>
 </template>
@@ -31,5 +35,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+.navbar-brand img {
+    height: 2rem;
+    filter: invert(.8);
+}
 
 </style>
