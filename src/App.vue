@@ -4,6 +4,7 @@
       <b-nav-toggle target="nav_collapse"></b-nav-toggle>
       <b-navbar-brand>
 	<!-- <b-img :src="require('./assets/logo.png')" /> -->
+	<!-- from https://www.shareicon.net/reader-people-sitting-read-reading-open-box-645366 -->
 	<img src='./assets/read.svg' />
 	<!-- Beirut Book Exchange -->
       </b-navbar-brand>

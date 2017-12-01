@@ -8,7 +8,8 @@ import App from './App'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 //import 'bootstrap/dist/css/bootstrap.css'
 import '../scss/custom.scss'
-import 'font-awesome/css/font-awesome.min.css'
+//import 'font-awesome/css/font-awesome.min.css'
+//using iconmoon instead to optimize icons
 
 // import VueFire from 'vuefire'
 
