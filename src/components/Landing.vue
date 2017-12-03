@@ -1,9 +1,51 @@
+
 <template>
   <div class="landing container">
 
       <h1 id="bookTitle">Book List</h1>
-      <b-form-input class="w-50 my-2 mr-auto" v-model="filter" placeholder="Search author or title" />
-      <b-table :items="booksFB" 
+	<div @click.stop class="d-flex mb-5"> <!-- style="white-space: nowrap" class="d-flex" -->
+	  <b-form-input class="w-50 mr-2" v-model="filter" placeholder="Search author or title" />
+
+	  <!-- <a>{{data.field.label}}</a> -->
+	  <!-- size="sm" class="mh-100" float-right -->
+	  <b-dropdown   id="ddown1" text="Type" >
+	      <b-form-checkbox v-model="allSelected"
+	  		       :indeterminate="indeterminate"
+	  		       aria-describedby="genre"
+	  		       aria-controls="genre"
+	  		       class="ml-3"
+	  		       @change="toggleAll"
+	  		       >
+	  	{{ allSelected ? 'Un-select' : 'Select' }}
+	  	All
+	      </b-form-checkbox>
+	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
+	    <b-form-checkbox-group id="genre"
+	  			   stacked
+	  			   v-model="selected"
+	  			   name="genre"
+	  			   :options="genre"
+	  			   class="ml-3"
+	  			   aria-label="Book Genre"
+	  			   ></b-form-checkbox-group>
+	  </b-dropdown>
+	</div>
+
+
+    <b-card-group deck>
+      <b-card v-for="book in filteredBooks" :key="book.key" :title="book.title">
+        <p class="card-text">
+          {{book.author}}
+        </p>
+        <div slot="footer">
+          <small class="text-muted">Last updated 3 mins ago</small>
+        </div>
+      </b-card>
+    </b-card-group>
+
+
+      <b-table v-if="false" 
+	       :items="booksFB" 
 	       :fields="fields"
 	       :filter="filterFunc"
 	       >
@@ -119,6 +161,12 @@ export default {
 	}
 
     },
+    computed: {
+	filteredBooks (){
+	    var self = this
+	    return self.booksFB.filter(self.filterFunc)
+	}
+    },
     watch: {
 	selected (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
@@ -155,10 +203,20 @@ export default {
 
 }
 
+.card-deck{
+    justify-content: center;
+}
+.card-deck .card {
+    flex: 0 0 15em;
+    margin-bottom: 1rem;
+    %max-width: 210px;
+    %min-width: 210px;
+}
 </style>
 
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 
 </style>
