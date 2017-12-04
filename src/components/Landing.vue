@@ -1,4 +1,4 @@
-
+<!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
   <div class="landing container">
 
@@ -32,60 +32,26 @@
 	</div>
 
 
-    <b-card-group deck>
-      <b-card v-for="book in filteredBooks" :key="book.key" :title="book.title">
-        <p class="card-text">
-          {{book.author}}
-        </p>
-        <div slot="footer">
-          <small class="text-muted">Last updated 3 mins ago</small>
-        </div>
-      </b-card>
-    </b-card-group>
+	<table class="table">
+	  <!-- <thead> -->
+          <!--   <tr> -->
+          <!--     <th>Title</th> -->
+          <!--     <th>Author</th> -->
+          <!--   </tr> -->
+	  <!-- </thead> -->
+	  <tbody>
+            <tr v-for="book in filteredBooks" :key="book.key">
+              <td>
+		<a href="" class="booktitle">{{book.title}}</a>
+		<br>
+		<a>by {{book.author}}</a>
+	      </td>
+              <td width=130px>Reserved</td>
+            </tr>
 
+	  </tbody>
+	</table>
 
-      <b-table v-if="false" 
-	       :items="booksFB" 
-	       :fields="fields"
-	       :filter="filterFunc"
-	       >
-
-	<template slot="HEAD_type" slot-scope="data">
-	  <!-- @click.stop stop checkbox from being 
-	       cancelled due to prevent default in table
-	       https://stackoverflow.com/questions/15767083/why-does-preventdefault-on-a-parent-elements-click-disable-a-checkbox
-	    -->
-
-	<div @click.stop > <!-- style="white-space: nowrap" class="d-flex" -->
-	  <!-- <a>{{data.field.label}}</a> -->
-	  <!-- size="sm" class="mh-100" float-right -->
-	  <b-dropdown   id="ddown1" text="Type" >
-	      <b-form-checkbox v-model="allSelected"
-	  		       :indeterminate="indeterminate"
-	  		       aria-describedby="genre"
-	  		       aria-controls="genre"
-	  		       class="ml-3"
-	  		       @change="toggleAll"
-	  		       >
-	  	{{ allSelected ? 'Un-select' : 'Select' }}
-	  	All
-	      </b-form-checkbox>
-	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
-	    <b-form-checkbox-group id="genre"
-	  			   stacked
-	  			   v-model="selected"
-	  			   name="genre"
-	  			   :options="genre"
-	  			   class="ml-3"
-	  			   aria-label="Book Genre"
-	  			   ></b-form-checkbox-group>
-	  </b-dropdown>
-	</div>
-      </template>
-
-
-
-      </b-table>
 
   </div>
 </template>
@@ -203,15 +169,45 @@ export default {
 
 }
 
-.card-deck{
+.ccard-deck{
     justify-content: center;
 }
-.card-deck .card {
+.ccard-deck .card {
     flex: 0 0 15em;
     margin-bottom: 1rem;
     %max-width: 210px;
     %min-width: 210px;
 }
+
+.booktitle,h1{
+    font-family: "Merriweather", serif;   
+}
+
+.booktitle {
+    font-weight: bold;
+    font-size: 120%;
+    color: #333333;
+}
+
+/* a:any-link { */
+/*   border: 1px solid blue; */
+/*   color: orange; */
+/* } */
+
+a:{
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #333333;
+}
+/* WebKit browsers */
+a:-webkit-any-link {
+  /* text-decoration: underline; */
+  curor: auto;
+}
+
 </style>
 
 
