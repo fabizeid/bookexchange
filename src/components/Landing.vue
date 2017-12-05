@@ -3,9 +3,11 @@
   <div class="landing container">
 
       <h1 id="bookTitle">Book List</h1>
-	<div @click.stop class="d-flex mb-5"> <!-- style="white-space: nowrap" class="d-flex" -->
-	  <b-form-input class="w-50 mr-2" v-model="filter" placeholder="Search author or title" />
-
+	<b-row @click.stop class="d-flex mb-5"> <!-- style="white-space: nowrap" class="d-flex" -->
+	  <b-col cols="6">
+	    <b-form-input v-model="filter" placeholder="Search author or title" />
+	  </b-col>
+	  <b-col>
 	  <!-- <a>{{data.field.label}}</a> -->
 	  <!-- size="sm" class="mh-100" float-right -->
 	  <b-dropdown   id="ddown1" text="Type" >
@@ -29,24 +31,37 @@
 	  			   aria-label="Book Genre"
 	  			   ></b-form-checkbox-group>
 	  </b-dropdown>
-	</div>
-
-
+	  </b-col>
+	  <b-col class="text-nowrap">
+	  <a>Sort by:</a>
+	  <b-form-select id="selectbg" class="p-0 align-self-center" style="height: auto" v-model="sortSelected" :options="sortOptions">
+	  </b-form-select>
+	  </b-col>
+	</b-row>
 	<table class="table">
-	  <!-- <thead> -->
-          <!--   <tr> -->
-          <!--     <th>Title</th> -->
-          <!--     <th>Author</th> -->
-          <!--   </tr> -->
-	  <!-- </thead> -->
 	  <tbody>
-            <tr v-for="book in filteredBooks" :key="book.key">
+            <tr v-for="(book, index) in filteredBooks"> <!-- :key="book.key" -->
               <td>
-		<a href="" class="booktitle">{{book.title}}</a>
+		<a :id="'title-'+index" class="booktitle" tabindex="0">{{book.title}}</a>
 		<br>
 		<a>by {{book.author}}</a>
+		<b-popover :target="'title-'+index" triggers="blur click">
+		  <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
+		  <a href="">more info</a>
+		</b-popover>
 	      </td>
-              <td width=130px>Reserved</td>
+              <td>
+		<a class="float-right">
+		  <strong class="text-nowrap">Reserved on:</strong> 11/04/17</a>
+		
+		
+		<br>
+		<a :id="'moreInfo-'+index" class="float-right" >more info...</a>		<b-popover :target="'moreInfo-'+index" triggers="hover focus">
+		  <strong>Added on:</strong> 09/03/2017 <br>
+		  <strong>Added by:</strong> johnb <br>
+		  <strong>Last reserved:</strong> 10/12/2107
+		</b-popover> 
+	      </td>
             </tr>
 
 	  </tbody>
@@ -96,7 +111,9 @@
 	      'History', 'Romance', 'Fiction'],
       selected: [],
       allSelected: false,
-      indeterminate: false
+      indeterminate: false,
+      sortSelected: null,
+      sortOptions: ['Default','Title','Author']
   };
 
 
@@ -187,6 +204,7 @@ export default {
     font-weight: bold;
     font-size: 120%;
     color: #333333;
+    outline: none;
 }
 
 /* a:any-link { */
@@ -206,6 +224,15 @@ a:hover {
 a:-webkit-any-link {
   /* text-decoration: underline; */
   curor: auto;
+}
+
+#selectbg {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cdd6db+0,cdd6db+49,afbdc6+51,dee7ed+100 */
+background: rgb(205,214,219); /* Old browsers */
+background: -moz-linear-gradient(top, rgba(205,214,219,1) 0%, rgba(205,214,219,1) 49%, rgba(175,189,198,1) 51%, rgba(222,231,237,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdd6db', endColorstr='#dee7ed',GradientType=0 ); /* IE6-9 */
 }
 
 </style>
