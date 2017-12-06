@@ -1,7 +1,6 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
   <div class="landing container">
-
       <h1 id="bookTitle">Book List</h1>
 	<b-row @click.stop class="d-flex mb-5"> <!-- style="white-space: nowrap" class="d-flex" -->
 	  <b-col cols="6">
@@ -40,15 +39,14 @@
 	</b-row>
 	<table class="table">
 	  <tbody>
-            <tr v-for="(book, index) in filteredBooks"> <!-- :key="book.key" -->
+            <template v-for="(book, index) in filteredBooks"> <!-- :key="book.key" -->
+	    <tr>
               <td>
-		<a :id="'title-'+index" class="booktitle" tabindex="0">{{book.title}}</a>
+		<a v-on:click="toggleCollapse('title-'+index)" href="#" class="booktitle" >
+		  {{book.title}}
+		</a>
 		<br>
 		<a>by {{book.author}}</a>
-		<b-popover :target="'title-'+index" triggers="blur click">
-		  <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
-		  <a href="">more info</a>
-		</b-popover>
 	      </td>
               <td>
 		<a class="float-right">
@@ -63,7 +61,16 @@
 		</b-popover> 
 	      </td>
             </tr>
-
+	      <tr>
+		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
+		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
+		   
+	      <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
+	      <a href="">more info</a>
+	      	    </b-collapse>
+		</td>
+	      </tr>
+	    </template>
 	  </tbody>
 	</table>
 
@@ -123,6 +130,12 @@ export default {
 	return componentData;
     },
     methods: {
+	logme(m) {
+	    console.log(m);
+	},
+	toggleCollapse(mid){
+	    this.$root.$emit("bv::toggle::collapse",mid);
+	    },
 	toggleAll (checked) {
 	    this.selected = checked ? this.genre.slice() : []
 	},
