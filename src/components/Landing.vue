@@ -2,7 +2,7 @@
 <template>
   <div class="landing container">
       <h1 id="bookTitle">Book List</h1>
-	<b-row @click.stop class="d-flex mb-5"> <!-- style="white-space: nowrap" class="d-flex" -->
+	<b-row @click.stop class="mb-5 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
 	  <b-col cols="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
 	  </b-col>
@@ -33,7 +33,7 @@
 	  </b-col>
 	  <b-col class="text-nowrap">
 	  <a>Sort by:</a>
-	  <b-form-select id="selectbg" class="p-0 align-self-center" style="height: auto" v-model="sortSelected" :options="sortOptions">
+	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: fit-content" v-model="sortSelected" :options="sortOptions">
 	  </b-form-select>
 	  </b-col>
 	</b-row>
@@ -49,26 +49,29 @@
 		<a>by {{book.author}}</a>
 	      </td>
               <td>
+		<!-- <a class="float-right"> -->
+		<!--   <strong class="text-nowrap">Reserved on:</strong> 11/04/17</a> -->
 		<a class="float-right">
-		  <strong class="text-nowrap">Reserved on:</strong> 11/04/17</a>
-		
-		
-		<br>
-		<a :id="'moreInfo-'+index" class="float-right" >more info...</a>		<b-popover :target="'moreInfo-'+index" triggers="hover focus">
-		  <strong>Added on:</strong> 09/03/2017 <br>
-		  <strong>Added by:</strong> johnb <br>
-		  <strong>Last reserved:</strong> 10/12/2107
-		</b-popover> 
+		  <strong class="text-nowrap">Reserved on:</strong>
+		  <ul><li>11/04/17</li></ul></a>
 	      </td>
             </tr>
 	      <tr>
-		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
+		<td style="border-top-width: 0; padding: 0;"> 
 		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
-		   
-	      <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
-	      <a href="">more info</a>
-	      	    </b-collapse>
+		    
+		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
+		    <a href="">more info</a>
+	      	  </b-collapse>
 		</td>
+		<td style="border-top-width: 0; padding: 0;"> 
+		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
+		    <strong>Added on:</strong> <ul><li>09/03/2017</li></ul> 
+		    <strong>Added by:</strong> <ul><li>johnb</li></ul>
+			<strong class="text-nowrap">Last reserved:</strong> <ul><li>10/12/2107</li></ul>
+	      	  </b-collapse>
+		</td>
+
 	      </tr>
 	    </template>
 	  </tbody>
@@ -86,7 +89,7 @@
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box', author: 'Amanda', type: 'Fiction',status: 'checked out'},
+		{ title: 'he box', author: 'Amanda', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Steve', type: 'Fiction sdfsdf sdfsdf',status: 'checked out'},
 		{ title: 'The box', author: 'Keith', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Don', type: 'Romance',status: 'checked out'},
@@ -119,7 +122,7 @@
       selected: [],
       allSelected: false,
       indeterminate: false,
-      sortSelected: null,
+      sortSelected: 'Default',
       sortOptions: ['Default','Title','Author']
   };
 
@@ -159,8 +162,15 @@ export default {
     },
     computed: {
 	filteredBooks (){
-	    var self = this
-	    return self.booksFB.filter(self.filterFunc)
+	    let orderBy = require('lodash.orderby');
+	    let self = this;
+	    let filteredBooks = self.booksFB.filter(self.filterFunc);
+            if (self.sortSelected != 'Default') {
+		console.log(self.sortSelected);
+		filteredBooks = orderBy(filteredBooks,[user => user[self.sortSelected.toLowerCase()].toLowerCase()]);
+		
+	    }
+	    return filteredBooks;
 	}
     },
     watch: {
