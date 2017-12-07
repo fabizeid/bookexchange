@@ -219,27 +219,28 @@ export default {
 .booktitle {
     font-weight: bold;
     font-size: 120%;
-    color: #333333;
     outline: none;
+    color: #333333;
 }
 
-/* a:any-link { */
-/*   border: 1px solid blue; */
-/*   color: orange; */
+/* a:{ */
+/*     text-decoration: none; */
 /* } */
 
-a:{
-    text-decoration: none;
+/* a:hover { */
+/*     text-decoration: underline; */
+/*     color: #333333; */
+/* } */
+
+a:any-link {
+  text-decoration: underline;
+  cursor: auto;
 }
 
-a:hover {
-    text-decoration: underline;
-    color: #333333;
-}
 /* WebKit browsers */
 a:-webkit-any-link {
-  /* text-decoration: underline; */
-  curor: auto;
+  text-decoration: underline;
+  cursor: auto;
 }
 
 #selectbg {
