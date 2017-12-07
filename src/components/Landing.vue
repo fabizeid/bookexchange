@@ -51,8 +51,7 @@
 	      </td>
               <td>
 		<small class="float-right">
-		  <strong class="text-nowrap">Reserved on:</strong>
-		  <ul><li>11/04/17</li></ul></small>
+		  <strong class="text-nowrap">Available on:</strong> 11/04/17</small>
 	      </td>
             </tr>
 	      <tr>
