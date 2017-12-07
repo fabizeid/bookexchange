@@ -2,11 +2,11 @@
 <template>
   <div class="landing container">
       <h1 id="bookTitle">Book List</h1>
-	<b-row @click.stop class="mb-5 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
-	  <b-col cols="6">
+	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
+	  <b-col sm="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
 	  </b-col>
-	  <b-col>
+	  <b-col class="py-2" >
 	  <!-- <a>{{data.field.label}}</a> -->
 	  <!-- size="sm" class="mh-100" float-right -->
 	  <b-dropdown   id="ddown1" text="Type" >
@@ -31,7 +31,7 @@
 	  			   ></b-form-checkbox-group>
 	  </b-dropdown>
 	  </b-col>
-	  <b-col class="text-nowrap">
+	  <b-col class="py-2 text-nowrap">
 	  <a>Sort by:</a>
 	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: fit-content" v-model="sortSelected" :options="sortOptions">
 	  </b-form-select>
@@ -42,36 +42,29 @@
             <template v-for="(book, index) in filteredBooks"> <!-- :key="book.key" -->
 	    <tr>
               <td>
-		<a v-on:click="toggleCollapse('title-'+index)" href="#" class="booktitle" >
+		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
+		<a v-on:click.stop.prevent="toggleCollapse('title-'+index)" href="#" class="booktitle" >
 		  {{book.title}}
 		</a>
 		<br>
 		<a>by {{book.author}}</a>
 	      </td>
               <td>
-		<!-- <a class="float-right"> -->
-		<!--   <strong class="text-nowrap">Reserved on:</strong> 11/04/17</a> -->
-		<a class="float-right">
+		<small class="float-right">
 		  <strong class="text-nowrap">Reserved on:</strong>
-		  <ul><li>11/04/17</li></ul></a>
+		  <ul><li>11/04/17</li></ul></small>
 	      </td>
             </tr>
 	      <tr>
-		<td style="border-top-width: 0; padding: 0;"> 
+		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
 		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
 		    
 		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
 		    <a href="">more info</a>
+		    <br><small><strong>Added on: </strong> 11/04/14</small>
+		    <br><small><strong>Added by: </strong> johnb</small>
 	      	  </b-collapse>
 		</td>
-		<td style="border-top-width: 0; padding: 0;"> 
-		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
-		    <strong>Added on:</strong> <ul><li>09/03/2017</li></ul> 
-		    <strong>Added by:</strong> <ul><li>johnb</li></ul>
-			<strong class="text-nowrap">Last reserved:</strong> <ul><li>10/12/2107</li></ul>
-	      	  </b-collapse>
-		</td>
-
 	      </tr>
 	    </template>
 	  </tbody>
