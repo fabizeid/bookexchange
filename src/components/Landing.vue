@@ -51,7 +51,9 @@
 	      </td>
               <td>
 		<small class="float-right">
-		  <strong class="text-nowrap">Available on:</strong> 11/04/17</small>
+		  <strong class="text-nowrap">Available on:</strong> 11/04/17
+		</small>
+		<br><b-button @click="showModal(index)" class="float-right" size="sm">Reserve</b-button>
 	      </td>
             </tr>
 	      <tr>
@@ -59,7 +61,7 @@
 		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
 		    
 		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
-		    <a href="">more info</a>
+		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
 		    <br><small><strong>Added by: </strong> johnb</small>
 	      	  </b-collapse>
@@ -70,6 +72,18 @@
 	</table>
 
 
+	<b-modal ref="reserveModal">
+	  <pre>
+
+  Hello,
+  To reserve "{{booksFB[reserveId].title}}"
+  please contact: "{{booksFB[reserveId].author}}"
+
+	  </pre>
+	</b-modal>
+
+
+	
   </div>
 </template>
 
@@ -115,7 +129,8 @@
       allSelected: false,
       indeterminate: false,
       sortSelected: 'Default',
-      sortOptions: ['Default','Title','Author']
+      sortOptions: ['Default','Title','Author'],
+      reserveId: 0
   };
 
 
@@ -128,6 +143,10 @@ export default {
 	logme(m) {
 	    console.log(m);
 	},
+	showModal(mid){
+	    this.reserveId = mid;
+	    this.$refs.reserveModal.show()
+	    },
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
 	    },
