@@ -1,45 +1,10 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
-  <div class="landing container">
-      <h1 id="bookTitle">Book List</h1>
-	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
-	  <b-col sm="6">
-	    <b-form-input v-model="filter" placeholder="Search author or title" />
-	  </b-col>
-	  <b-col class="py-2" >
-	  <!-- <a>{{data.field.label}}</a> -->
-	  <!-- size="sm" class="mh-100" float-right -->
-	  <b-dropdown   id="ddown1" text="Type" >
-	      <b-form-checkbox v-model="allSelected"
-	  		       :indeterminate="indeterminate"
-	  		       aria-describedby="genre"
-	  		       aria-controls="genre"
-  		       class="ml-3"
-	  		       @change="toggleAll"
-	  		       >
-	  	{{ allSelected ? 'Un-select' : 'Select' }}
-	  	All
-	      </b-form-checkbox>
-	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
-	    <b-form-checkbox-group id="genre"
-	  			   stacked
-	  			   v-model="selected"
-	  			   name="genre"
-	  			   :options="genre"
-	  			   class="ml-3"
-	  			   aria-label="Book Genre"
-	  			   ></b-form-checkbox-group>
-	  </b-dropdown>
-	  </b-col>
-	  <b-col class="py-2 text-nowrap">
-	  <a>Sort by:</a>
-	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: fit-content" v-model="sortSelected" :options="sortOptions">
-	  </b-form-select>
-	  </b-col>
-	</b-row>
+  <div class="profile container">
+      <h2 id="bookTitle">Reserved Books</h2>
 	<table class="table">
 	  <tbody>
-            <template v-for="(book, index) in filteredBooks"> <!-- :key="book.key" -->
+            <template v-for="(book, index) in reservedBooks"> <!-- :key="book.key" -->
 	    <tr>
               <td>
 		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
@@ -51,10 +16,10 @@
 	      </td>
               <td>
 		<small class="float-right">
-		  <strong class="text-nowrap">Available on:</strong> 11/04/17
+		  <strong class="text-nowrap">Return by:</strong> 11/04/17
 		</small>
 		<br><a href="#" @click.prevent="showModal(index)" class="float-right" size="sm">
-		  Reserve
+		  Extend
 		</a>
 	      </td>
             </tr>
@@ -78,13 +43,66 @@
 	  <pre>
 
   Hello,
-  To reserve "{{booksFB[reserveId].title}}"
-  please contact: "{{booksFB[reserveId].author}}"
+  To extend "{{reservedBooks[reserveId].title}}"
+  please contact: "{{reservedBooks[reserveId].author}}"
 
 	  </pre>
 	</b-modal>
+	<hr>
+      <h2 id="bookTitle">My Books</h2>
+	<table class="table">
+	  <tbody>
+            <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
+	    <tr>
+              <td>
+		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
+		<a class="booktitle" >
+		  {{book.title}}
+		</a>
+		<br>
+		<a>by {{book.author}}</a>
+	      </td>
+              <td>
+		<small class="float-right">
+		  <strong class="text-nowrap">Available on:</strong>11/04/17
+		</small>
+		<br><a href="#" @click.prevent="toggleCollapse('add-'+index)" class="float-right" size="sm">
+		  Edit
+		</a>
+	      </td>
+            </tr>
+	      <tr>
+		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
+		  <b-collapse :id="'add-'+index" style="padding: .75rem;">
+		    
+		    <b-form-textarea id="textarea1"
+				     v-model="description"
+				     placeholder="Enter something"
+				     rows="6"
+				     max-rows="6"></b-form-textarea>
+		    
+		    <router-link to="/book/1230974">more info</router-link>
+		    <br><small><strong>Added on: </strong> 11/04/14</small>
+		    <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input>
+		    <br><small><strong>Added by: </strong> johnb</small>
+		    <b-button class="float-right mb-3" size="sm" variant="primary">Save</b-button>
+	      	  </b-collapse>
+		</td>
+	      </tr>
+	    </template>
+	  </tbody>
+	</table>
 
 
+	<b-modal ref="addModal">
+	  <pre>
+
+  Hello,
+  To extend "{{myBooks[reserveId].title}}"
+  please contact: "{{myBooks[reserveId].author}}"
+
+	  </pre>
+	</b-modal>
 	
   </div>
 </template>
@@ -93,16 +111,18 @@
 
   var componentData = {
 
-      booksFB: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
+      reservedBooks: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'},
-		{ title: 'he box', author: 'Amanda', type: 'Fiction',status: 'checked out'},
+		      { title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'}],
+      myBooks:[
+	  { title: 'he box', author: 'Amanda', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Steve', type: 'Fiction sdfsdf sdfsdf',status: 'checked out'},
 		{ title: 'The box', author: 'Keith', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Don', type: 'Romance',status: 'checked out'},
 		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
-      filter: null,
+      description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
+      availableDate:"2017-11-07",
       fields: [
 	  {
 	      key: 'title',
@@ -151,55 +171,7 @@ export default {
 	    },
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
-	    },
-	toggleAll (checked) {
-	    this.selected = checked ? this.genre.slice() : []
-	},
-	filterFunc (item){
-	    let test = true;
-	    if(this.filter) {
-		let regex = new RegExp('.*' + this.filter + '.*', 'ig');
-		let itemSearchStr=[item["author"],item["title"]].join(' ');
-		test = regex.test(itemSearchStr);
-		regex.lastIndex = 0;
-		}
-	    if(this.selected.length) {
-		test = test & (this.selected.indexOf(item["type"]) !== -1);
 	    }
-	    return test;
-	    //debugger;
-	    //console.log(i,this.filter);
-	    //console.log(i,this.selected);
-	}
-
-    },
-    computed: {
-	filteredBooks (){
-	    let orderBy = require('lodash.orderby');
-	    let self = this;
-	    let filteredBooks = self.booksFB.filter(self.filterFunc);
-            if (self.sortSelected != 'Default') {
-		console.log(self.sortSelected);
-		filteredBooks = orderBy(filteredBooks,[user => user[self.sortSelected.toLowerCase()].toLowerCase()]);
-		
-	    }
-	    return filteredBooks;
-	}
-    },
-    watch: {
-	selected (newVal, oldVal) {
-	    // Handle changes in individual flavour checkboxes
-	    if (newVal.length === 0) {
-		this.indeterminate = false
-		this.allSelected = false
-	    } else if (newVal.length === this.genre.length) {
-		this.indeterminate = false
-		this.allSelected = true
-	    } else {
-		this.indeterminate = true
-		this.allSelected = false
-	    }
-	}
     }
 }
 </script>

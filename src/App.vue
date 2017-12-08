@@ -14,6 +14,7 @@
 	<b-nav is-nav-bar>
 	  <b-nav-item  to="/" exact>Home</b-nav-item>
 	  <b-nav-item  to="/library" exact>Browse</b-nav-item>
+	  <b-nav-item  to="/profile" exact>Profile</b-nav-item>
 	</b-nav>
 	<LoginButton></LoginButton>
       </b-collapse>
