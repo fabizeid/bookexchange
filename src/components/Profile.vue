@@ -1,7 +1,7 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
   <div class="profile container">
-      <h2 id="bookTitle">Reserved Books</h2>
+      <h2 id="bookTitle" class="my-3">Books I Borrowed</h2>
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in reservedBooks"> <!-- :key="book.key" -->
@@ -24,9 +24,9 @@
 	      </td>
             </tr>
 	      <tr>
-		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
+		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
-		    
+
 		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
 		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
@@ -49,7 +49,7 @@
 	  </pre>
 	</b-modal>
 	<hr>
-      <h2 id="bookTitle">My Books</h2>
+      <h2 id="bookTitle" class="my-3">Books I Own</h2>
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
@@ -66,21 +66,27 @@
 		<small class="float-right">
 		  <strong class="text-nowrap">Available on:</strong>11/04/17
 		</small>
-		<br><a href="#" @click.prevent="toggleCollapse('add-'+index)" class="float-right" size="sm">
-		  Edit
-		</a>
+		<br>
+		<div class="float-right">
+		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleCollapse('add-'+index)">
+		    <icon name="pencil"/></a>
+		  <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent>
+		    <icon name="trash"/></a>
+		  		<!--<span class="fa fa-trash" aria-hidden="true"></span> v-on:click="removeBook(book)"
+		<span class="fa fa-pencil" aria-hidden="true" ></span><!-- onclick="editMe(this)" -->
+		</div>
 	      </td>
             </tr>
 	      <tr>
-		<td colspan="2" style="border-top-width: 0; padding: 0;"> 
+		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'add-'+index" style="padding: .75rem;">
-		    
+
 		    <b-form-textarea id="textarea1"
 				     v-model="description"
 				     placeholder="Enter something"
 				     rows="6"
 				     max-rows="6"></b-form-textarea>
-		    
+
 		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
 		    <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input>
@@ -90,6 +96,13 @@
 		</td>
 	      </tr>
 	    </template>
+	    <tr>
+	      <td></td>
+	      <td>
+	      <a v-b-tooltip.hover title="Add new book" href="#" @click.prevent="toggleCollapse('add-end')" class="float-right" size="sm">
+		  <icon name="plus"/></a>
+		</a>
+	      </td></tr>
 	  </tbody>
 	</table>
 
@@ -103,11 +116,15 @@
 
 	  </pre>
 	</b-modal>
-	
+
   </div>
 </template>
 
 <script>
+
+import 'vue-awesome/icons/trash'
+import 'vue-awesome/icons/pencil'
+import 'vue-awesome/icons/plus'
 
   var componentData = {
 
@@ -145,7 +162,7 @@
 	  }
       ],
 
-      genre: ['Biography/Memoir', 'Art/Photograhy', 
+      genre: ['Biography/Memoir', 'Art/Photograhy',
 	      'History', 'Romance', 'Fiction'],
       selected: [],
       allSelected: false,
@@ -190,12 +207,12 @@ export default {
     padding-bottom: 2px;
     border: 0px;
     padding-top: 0rem;
-   
+
 
 }
 
 .booktitle,h1{
-    font-family: "Merriweather", serif;   
+    font-family: "Merriweather", serif;
 }
 
 .booktitle {
@@ -239,5 +256,4 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdd6db', end
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 </style>

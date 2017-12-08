@@ -1,14 +1,15 @@
 <template>
   <b-button size="sm" v-on:click="toggleSignIn()" class="ml-auto">
-    <!-- <i class="fa" v-bind:class="{ 'fa-sign-in': !signedIn , 'fa-sign-out': signedIn }" aria-hidden="true"> -->
-    <!-- </i> --> 
-
-    <i v-bind:class="{ 'icon-sign-in': !signedIn , 'icon-sign-out': signedIn }" aria-hidden="true"></i> 
+    <icon v-bind:name = "signedIn? 'sign-in': 'sign-out'" aria-hidden="true"></icon>
     {{signInMessage}}
   </b-button>
 </template>
 
 <script>
+
+import 'vue-awesome/icons/sign-in'
+import 'vue-awesome/icons/sign-out'
+  
 // Initialize Firebase
 var config = {
     apiKey: "AIzaSyAVZsubeql5nwSz5vq4CkqUcrT0FOXN-YY",
@@ -102,37 +103,4 @@ firebase.auth().onAuthStateChanged(function(user) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-@font-face {
-  font-family: 'icomoon';
-  src:  url('../assets/fonts/icomoon.eot?lvelkq');
-  src:  url('../assets/fonts/icomoon.eot?lvelkq#iefix') format('embedded-opentype'),
-    url('../assets/fonts/icomoon.ttf?lvelkq') format('truetype'),
-    url('../assets/fonts/icomoon.woff?lvelkq') format('woff'),
-    url('../assets/fonts/icomoon.svg?lvelkq#icomoon') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
-
-i {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: 'icomoon' !important;
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.icon-sign-out:before {
-  content: "\e901";
-}
-.icon-sign-in:before {
-  content: "\e900";
-}
-
 </style>

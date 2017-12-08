@@ -1,7 +1,7 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
-  <div class="landing container">
-      <h1 id="bookTitle">Book List</h1>
+  <div class="landing container">    
+      <h2 id="bookTitle">Book List</h2>
 	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
 	  <b-col sm="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
@@ -90,7 +90,6 @@
 </template>
 
 <script>
-
   var componentData = {
 
       booksFB: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},

@@ -8,9 +8,9 @@ import App from './App'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 //import 'bootstrap/dist/css/bootstrap.css'
 import '../scss/custom.scss'
-//import 'font-awesome/css/font-awesome.min.css'
-//using iconmoon instead to optimize icons
 
+import Icon from 'vue-awesome/components/Icon'
+Vue.component('icon', Icon)
 // import VueFire from 'vuefire'
 
 Vue.config.productionTip = false
