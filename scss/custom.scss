@@ -1,11 +1,34 @@
 
-$body-bg: #afbdc6;
-$dropdown-bg: darken($body-bg,10%);
-$input-bg: lighten($body-bg,10%);
+$box-bg: #afbdc6;
+$dropdown-bg: darken($box-bg,10%);
+$body_bg: $dropdown-bg;
+$input-bg: lighten($box-bg,10%);
 $custom-select-bg: $input-bg;
 $custom-select-indicator: none;
 @import "node_modules/bootstrap/scss/bootstrap";
 
+.boxedTable {
+    padding: 1rem .5rem 1rem .5rem;
+    margin-bottom: .5rem;
+    background-color:$box-bg;
+}
+
+.booktitle,h1{
+    font-family: "Merriweather", serif;
+}
+
+.booktitle {
+    font-weight: bold;
+    font-size: 120%;
+    outline: none;
+    color: #333333;
+    
+}
+
+h2 {
+    padding: 1rem;
+    background-color: hsla(203, 17%, 67%, 1);
+}
 
 /* Needed to align vue-awesome icons */
 .btn .fa-icon {

@@ -1,7 +1,8 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
   <div class="landing container">    
-      <h2 id="bookTitle">Book List</h2>
+    <div class="boxedTable">
+    <h2 id="bookTitle">Book List</h2>
 	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
 	  <b-col sm="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
@@ -72,7 +73,7 @@
 	    </template>
 	  </tbody>
 	</table>
-
+    </div>
 
 	<b-modal ref="reserveModal">
 	  <pre>
@@ -219,17 +220,6 @@ export default {
     padding-top: 0rem;
    
 
-}
-
-.booktitle,h1{
-    font-family: "Merriweather", serif;   
-}
-
-.booktitle {
-    font-weight: bold;
-    font-size: 120%;
-    outline: none;
-    color: #333333;
 }
 
 /* a:{ */

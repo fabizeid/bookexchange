@@ -1,7 +1,8 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
   <div class="profile container">
-      <h2 id="bookTitle" class="my-3">Books I Borrowed</h2>
+   <div class="boxedTable">
+    <h2 id="bookTitle">Books I borrowed</h2>
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in reservedBooks"> <!-- :key="book.key" -->
@@ -37,7 +38,7 @@
 	    </template>
 	  </tbody>
 	</table>
-
+   </div>
 
 	<b-modal ref="reserveModal">
 	  <pre>
@@ -48,8 +49,9 @@
 
 	  </pre>
 	</b-modal>
-	<hr>
-      <h2 id="bookTitle" class="my-3">Books I Own</h2>
+
+   <div class="boxedTable">
+      <h2 id="bookTitle">Books I own</h2>
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
@@ -108,7 +110,7 @@
 	      </td></tr>
 	  </tbody>
 	</table>
-
+</div>
 
 	<b-modal ref="confirmModal">
 	  <pre>
@@ -203,43 +205,6 @@ export default {
 </script>
 
 <style>
-
-#ddown1{
-    font-weight: initial;
-}
-#ddown1__BV_toggle_ {
-    background-color: transparent;
-    color: black;
-    padding: .8rem .2rem;
-    /*line-height: 1;*/
-    font-weight: bold;
-    padding-bottom: 2px;
-    border: 0px;
-    padding-top: 0rem;
-
-
-}
-
-.booktitle,h1{
-    font-family: "Merriweather", serif;
-}
-
-.booktitle {
-    font-weight: bold;
-    font-size: 120%;
-    outline: none;
-    color: #333333;
-}
-
-/* a:{ */
-/*     text-decoration: none; */
-/* } */
-
-/* a:hover { */
-/*     text-decoration: underline; */
-/*     color: #333333; */
-/* } */
-
 a:any-link {
   text-decoration: underline;
   cursor: auto;
@@ -249,15 +214,6 @@ a:any-link {
 a:-webkit-any-link {
   text-decoration: underline;
   cursor: auto;
-}
-
-#selectbg {
-    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cdd6db+0,cdd6db+49,afbdc6+51,dee7ed+100 */
-background: rgb(205,214,219); /* Old browsers */
-background: -moz-linear-gradient(top, rgba(205,214,219,1) 0%, rgba(205,214,219,1) 49%, rgba(175,189,198,1) 51%, rgba(222,231,237,1) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdd6db', endColorstr='#dee7ed',GradientType=0 ); /* IE6-9 */
 }
 
 </style>
