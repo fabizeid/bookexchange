@@ -14,11 +14,11 @@
 		<br>
 		<a>by {{book.author}}</a>
 	      </td>
-              <td>
-		<small class="float-right">
+              <td class="text-right">
+		<small>
 		  <strong class="text-nowrap">Return by:</strong> 11/04/17
 		</small>
-		<br><a href="#" @click.prevent="showModal(index)" class="float-right" size="sm">
+		<br><a href="#" @click.prevent="showModal(index)" class="text-right" size="sm">
 		  Extend
 		</a>
 	      </td>
@@ -62,15 +62,15 @@
 		<br>
 		<a>by {{book.author}}</a>
 	      </td>
-              <td>
-		<small class="float-right">
+              <td class="text-right">
+		<small >
 		  <strong class="text-nowrap">Available on:</strong>11/04/17
 		</small>
 		<br>
-		<div class="float-right">
+		<div>
 		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleCollapse('add-'+index)">
 		    <icon name="pencil"/></a>
-		  <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent>
+		  <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
 		    <icon name="trash"/></a>
 		  		<!--<span class="fa fa-trash" aria-hidden="true"></span> v-on:click="removeBook(book)"
 		<span class="fa fa-pencil" aria-hidden="true" ></span><!-- onclick="editMe(this)" -->
@@ -91,7 +91,10 @@
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
 		    <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input>
 		    <br><small><strong>Added by: </strong> johnb</small>
-		    <b-button class="float-right mb-3" size="sm" variant="primary">Save</b-button>
+		    <div class="text-right mb-3">
+		      <b-button  size="sm" @click.prevent="toggleCollapse('add-'+index)">Cancel</b-button>
+		      <b-button  size="sm" @click.prevent="toggleCollapse('add-'+index)" variant="primary">Save</b-button>
+		    </div>
 	      	  </b-collapse>
 		</td>
 	      </tr>
@@ -107,12 +110,12 @@
 	</table>
 
 
-	<b-modal ref="addModal">
+	<b-modal ref="confirmModal">
 	  <pre>
 
-  Hello,
-  To extend "{{myBooks[reserveId].title}}"
-  please contact: "{{myBooks[reserveId].author}}"
+   Are you sure you want to delete:
+   {{myBookId}}	    
+  "{{myBooks[myBookId].title}}"
 
 	  </pre>
 	</b-modal>
@@ -137,6 +140,7 @@ import 'vue-awesome/icons/plus'
 		{ title: 'The box', author: 'Steve', type: 'Fiction sdfsdf sdfsdf',status: 'checked out'},
 		{ title: 'The box', author: 'Keith', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Don', type: 'Romance',status: 'checked out'},
+		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
@@ -169,7 +173,8 @@ import 'vue-awesome/icons/plus'
       indeterminate: false,
       sortSelected: 'Default',
       sortOptions: ['Default','Title','Author'],
-      reserveId: 0
+      reserveId: 0,
+      myBookId: 0
   };
 
 
@@ -182,6 +187,11 @@ export default {
 	logme(m) {
 	    console.log(m);
 	},
+	showConfirmModal(mid){
+	    console.log(mid);
+	    this.myBookId = mid;
+	    this.$refs.confirmModal.show()
+	    },
 	showModal(mid){
 	    this.reserveId = mid;
 	    this.$refs.reserveModal.show()

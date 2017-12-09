@@ -49,11 +49,11 @@
 		<br>
 		<a>by {{book.author}}</a>
 	      </td>
-              <td>
-		<small class="float-right">
+              <td class="text-right">
+		<small>
 		  <strong class="text-nowrap">Available on:</strong> 11/04/17
 		</small>
-		<br><a href="#" @click.prevent="showModal(index)" class="float-right" size="sm">
+		<br><a href="#" @click.prevent="showModal(index)" size="sm">
 		  Reserve
 		</a>
 	      </td>
