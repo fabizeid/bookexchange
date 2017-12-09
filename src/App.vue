@@ -16,7 +16,7 @@
 	  <b-nav-item  to="/library" exact>Browse</b-nav-item>
 	  <b-nav-item  to="/profile" exact>Profile</b-nav-item>
 	</b-nav>
-	<LoginButton></LoginButton>
+	<LoginButton class="ml-sm-auto mt-sm-2-down"></LoginButton>
       </b-collapse>
     </b-navbar>
     <div class="my-4 pb-3"/>
@@ -43,4 +43,11 @@ export default {
     filter: invert(.8);
 }
 
-</style>
+@media (max-width: 767px) {
+    .mt-sm-2-down {
+	margin-top: 0.5rem !important;
+    }
+
+}
+
+ </style>

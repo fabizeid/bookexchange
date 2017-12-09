@@ -1,5 +1,5 @@
 <template>
-  <b-button size="sm" v-on:click="toggleSignIn()" class="ml-auto">
+  <b-button size="sm" v-on:click="toggleSignIn()">
     <icon v-bind:name = "signedIn? 'sign-in': 'sign-out'" aria-hidden="true"></icon>
     {{signInMessage}}
   </b-button>

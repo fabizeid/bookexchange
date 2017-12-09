@@ -188,7 +188,6 @@ export default {
 	    console.log(m);
 	},
 	showConfirmModal(mid){
-	    console.log(mid);
 	    this.myBookId = mid;
 	    this.$refs.confirmModal.show()
 	    },
