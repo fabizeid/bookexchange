@@ -25,6 +25,18 @@ $custom-select-indicator: none;
     
 }
 
+.myinput[readonly] {
+    background-color: transparent;
+    border-width: 0px;
+    padding: 0px;
+}
+
+.myinput:not([readonly]) {
+    @extend .form-control;
+    display: inline-block;
+    width: auto;
+}
+
 h2 {
     padding: 1rem;
     background-color: hsla(203, 17%, 67%, 1);

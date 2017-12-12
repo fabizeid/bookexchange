@@ -21,7 +21,7 @@ npm run build --report
 firebase deploy
 firebase deploy --only firestore:rules
 
-firebase server (for local server)
+firebase serve (for local server)
 
 ```
 

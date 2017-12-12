@@ -57,12 +57,19 @@
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
 	    <tr>
               <td>
-		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		<a class="booktitle" >
-		  {{book.title}}
-		</a>
-		<br>
-		<a>by {{book.author}}</a>
+		<input :size="book.author.length?book.title.length:10"  v-model="book.title"
+		       placeholder="Enter Title"
+		       readonly
+		       class="booktitle myinput"
+                       type="text">
+		       </input> {{book.title}}
+		<br> by 
+		<input :size="book.author.length?book.author.length:10"  v-model="book.author"
+		       placeholder="Enter Author"
+		       readonly
+		       class="myinput"
+                       type="text">
+		       </input>
 	      </td>
               <td class="text-right">
 		<small >
@@ -70,32 +77,38 @@
 		</small>
 		<br>
 		<div>
-		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleCollapse('add-'+index)">
+		  <!-- stop.prevent added to avoid scrolling to top after collapsing -->
+		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit('add-'+index,false)">
 		    <icon name="pencil"/></a>
 		  <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
 		    <icon name="trash"/></a>
-		  		<!--<span class="fa fa-trash" aria-hidden="true"></span> v-on:click="removeBook(book)"
-		<span class="fa fa-pencil" aria-hidden="true" ></span><!-- onclick="editMe(this)" -->
 		</div>
 	      </td>
             </tr>
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
-		  <b-collapse :id="'add-'+index" style="padding: .75rem;">
+		  <b-collapse :id="'add-'+index" @show="makeEdit('add-'+index,index)" v-on:hidden="removeEdit('add-'+index,index)"  style="padding: .75rem;">
 
-		    <b-form-textarea id="textarea1"
-				     v-model="description"
-				     placeholder="Enter something"
-				     rows="6"
-				     max-rows="6"></b-form-textarea>
+		    <!-- <b-form-textarea id="textarea1" -->
+		    <!-- 		     v-model="description" -->
+		    <!-- 		     placeholder="Enter something" -->
+		    <!-- 		     rows="6" -->
+		    <!-- 		     max-rows="6"></b-form-textarea> -->
+
+		    <textarea id="textarea1" class="form-control"
+		    		     placeholder="Enter something"
+		    		     rows="6"
+		    		     max-rows="6">{{description}}</textarea>
+
 
 		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
-		    <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input>
+		    <!-- <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input> -->
+		    <input  class="form-control form-control-sm" type="date">11/04/17</input>
 		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
-		      <b-button  size="sm" @click.prevent="toggleCollapse('add-'+index)">Cancel</b-button>
-		      <b-button  size="sm" @click.prevent="toggleCollapse('add-'+index)" variant="primary">Save</b-button>
+		      <b-button  size="sm" @click.prevent="toggleEdit('add-'+index,false)">Cancel</b-button>
+		      <b-button  size="sm" @click.prevent="toggleEdit('add-'+index,true)" variant="primary">Save</b-button>
 		    </div>
 	      	  </b-collapse>
 		</td>
@@ -143,7 +156,8 @@ import 'vue-awesome/icons/plus'
 		{ title: 'The box', author: 'Keith', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box', author: 'Don', type: 'Romance',status: 'checked out'},
 		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
+	  { title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
+      oldBookInfo:[],
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
       fields: [
@@ -196,10 +210,69 @@ export default {
 	showModal(mid){
 	    this.reserveId = mid;
 	    this.$refs.reserveModal.show()
-	    },
+	},
+	makeEdit(mid,id){
+	    let el = document.getElementById(mid); //current element
+	    //get all elements with class myinput in prevous tr element
+	    //could not use closest function yet since it is experimental
+	    let inputEls =el.parentElement.parentElement.previousElementSibling.querySelectorAll(".myinput");
+	 
+	    for (let i=0; i< inputEls.length; i++){
+		inputEls[i].removeAttribute("readonly");
+		// inputEls[i].setAttribute("data-beirut-oldvalue",inputEls[i].value);
+	    }
+	    this.backupBook(id);
+
+	},
+	removeEdit(mid,id){
+	    let el = document.getElementById(mid);
+	    let inputEls =el.parentElement.parentElement.previousElementSibling.querySelectorAll(".myinput");
+	    let clickedSave = this.clickedSave;
+	    for (let i=0; i< inputEls.length; i++){
+		inputEls[i].setAttribute("readonly","readonly");
+		// if(!clickedSave)
+		//     inputEls[i].value = inputEls[i].getAttribute("data-beirut-oldvalue");
+		
+		// inputEls[i].removeAttribute("data-beirut-oldvalue");
+	    }
+	    if(!clickedSave) //revert
+		{
+		    //console.log(id + "Before " + JSON.stringify(this.oldBookInfo[id]) + " " + JSON.stringify(this.myBooks[id]));
+		    //Following did not work since it overwrote the reactive elements of the object
+		    //this.myBooks[id] =  Object.assign({}, this.oldBookInfo[id]);
+		    //console.log(id + "After " + JSON.stringify(this.oldBookInfo[id]) + " " + JSON.stringify(this.myBooks[id]));		    
+		    //console.log("revert "+JSON.stringify(this.oldBookInfo[id]));
+		    this.restoreBook(id);
+		}
+	    this.clickedSave = false;
+	},
+	backupBook(id){
+	    //this.copyBook(this.myBooks[id],this.oldBookInfo[id]);
+	    this.oldBookInfo[id] = Object.assign({}, this.myBooks[id]);
+	},
+	restoreBook(id){
+	    // doing manually since Object.assign({}) overwrote reactive listeners
+	    //this.myBooks[id] = Object.assign({},this.oldBookInfo[id]);
+	    let to = this.myBooks[id];
+	    let from = this.oldBookInfo[id];
+	    //TODO: find a better solution
+	    to.title = from.title ;
+	    to.author = from.author ;
+	    to.type = from.type ;
+
+	},
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
-	    }
+	},
+	toggleEdit(mid,save){
+	    if(save)
+		this.clickedSave = true;
+	    else
+		this.clickedSave = false;
+	   
+	    this.toggleCollapse(mid);
+	}
+
     }
 }
 </script>
