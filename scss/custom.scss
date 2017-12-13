@@ -25,13 +25,13 @@ $custom-select-indicator: none;
     
 }
 
-.myinput[readonly] {
+.myinput:not([contenteditable]) {
     background-color: transparent;
     border-width: 0px;
     padding: 0px;
 }
 
-.myinput:not([readonly]) {
+.myinput[contenteditable] {
     @extend .form-control;
     display: inline-block;
     width: auto;

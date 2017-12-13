@@ -57,19 +57,9 @@
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
 	    <tr>
               <td>
-		<input :size="book.author.length?book.title.length:10"  v-model="book.title"
-		       placeholder="Enter Title"
-		       readonly
-		       class="booktitle myinput"
-                       type="text">
-		       </input> {{book.title}}
-		<br> by 
-		<input :size="book.author.length?book.author.length:10"  v-model="book.author"
-		       placeholder="Enter Author"
-		       readonly
-		       class="myinput"
-                       type="text">
-		       </input>
+		<a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
+		<br>
+		by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a> 
 	      </td>
               <td class="text-right">
 		<small >
@@ -216,10 +206,14 @@ export default {
 	    //get all elements with class myinput in prevous tr element
 	    //could not use closest function yet since it is experimental
 	    let inputEls =el.parentElement.parentElement.previousElementSibling.querySelectorAll(".myinput");
-	 
+
+	    let currentElem;
 	    for (let i=0; i< inputEls.length; i++){
-		inputEls[i].removeAttribute("readonly");
-		// inputEls[i].setAttribute("data-beirut-oldvalue",inputEls[i].value);
+		currentElem = inputEls[i]; 
+		currentElem.setAttribute("contenteditable",true);
+		currentElem.setAttribute("data-f-oldvalue",currentElem.innerText);
+		currentElem.profVue = this;
+		//currentElem.addEventListener("input", validate);
 	    }
 	    this.backupBook(id);
 
@@ -229,21 +223,24 @@ export default {
 	    let inputEls =el.parentElement.parentElement.previousElementSibling.querySelectorAll(".myinput");
 	    let clickedSave = this.clickedSave;
 	    for (let i=0; i< inputEls.length; i++){
-		inputEls[i].setAttribute("readonly","readonly");
-		// if(!clickedSave)
-		//     inputEls[i].value = inputEls[i].getAttribute("data-beirut-oldvalue");
-		
-		// inputEls[i].removeAttribute("data-beirut-oldvalue");
-	    }
-	    if(!clickedSave) //revert
-		{
-		    //console.log(id + "Before " + JSON.stringify(this.oldBookInfo[id]) + " " + JSON.stringify(this.myBooks[id]));
-		    //Following did not work since it overwrote the reactive elements of the object
-		    //this.myBooks[id] =  Object.assign({}, this.oldBookInfo[id]);
-		    //console.log(id + "After " + JSON.stringify(this.oldBookInfo[id]) + " " + JSON.stringify(this.myBooks[id]));		    
-		    //console.log("revert "+JSON.stringify(this.oldBookInfo[id]));
-		    this.restoreBook(id);
+		let element = inputEls[i];
+		element.removeAttribute("contenteditable");		
+		if(clickedSave){
+		    let fieldName = element.getAttribute("data-f-field");
+		    let index = Number(element.getAttribute("data-f-index"));
+		    let profVue = element.profVue;
+		    profVue.myBooks[index][fieldName] = element.innerText;
+		} else {
+		    element.innerText = element.getAttribute("data-f-oldvalue");
 		}
+		
+		element.removeAttribute("data-f-oldvalue");
+	    }
+	    //revert remaining non special elements
+	    if(!clickedSave) //revert
+	     {
+		 this.restoreBook(id);
+	     }
 	    this.clickedSave = false;
 	},
 	backupBook(id){
@@ -255,9 +252,10 @@ export default {
 	    //this.myBooks[id] = Object.assign({},this.oldBookInfo[id]);
 	    let to = this.myBooks[id];
 	    let from = this.oldBookInfo[id];
-	    //TODO: find a better solution
-	    to.title = from.title ;
-	    to.author = from.author ;
+	    
+	    //Title and author are special case and restored differently
+	    //to.title = from.title ; 
+	    //to.author = from.author ;
 	    to.type = from.type ;
 
 	},
