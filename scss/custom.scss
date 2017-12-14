@@ -41,7 +41,14 @@ h2 {
     padding: 1rem;
     background-color: hsla(203, 17%, 67%, 1);
 }
+/* needed to avoid table stretching if title or author two long */
+table {
+    table-layout: fixed;
+}
 
+td {
+    overflow-x:scroll;
+}
 /* Needed to align vue-awesome icons */
 .btn .fa-icon {
     vertical-align: middle;
