@@ -46,8 +46,9 @@ table {
     table-layout: fixed;
 }
 
-td {
-    overflow-x:scroll;
+a {
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 /* Needed to align vue-awesome icons */
 .btn .fa-icon {
