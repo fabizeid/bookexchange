@@ -62,10 +62,14 @@
 		by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a> 
 	      </td>
               <td class="text-right">
-		<small >
-		  <strong class="text-nowrap">Available on:</strong>11/04/17
-		</small>
-		<br>
+		<div>
+		  <small ><strong class="text-nowrap">Available on:</strong></small> 
+		  <datepicker v-model="time"
+			      input-class="form-control form-control-sm datepickerInput"
+			      calendar-class="datepickerCalendar"
+			      class="d-inline-block"
+			      ></datepicker>
+		</div>
 		<div>
 		  <!-- stop.prevent added to avoid scrolling to top after collapsing -->
 		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit('add-'+index,false)">
@@ -94,7 +98,7 @@
 		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
 		    <!-- <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input> -->
-		    <input  class="form-control form-control-sm" type="date">11/04/17</input>
+		    <!-- <input  type="date">11/04/17</input> -->
 		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleEdit('add-'+index,false)">Cancel</b-button>
@@ -133,6 +137,7 @@
 import 'vue-awesome/icons/trash'
 import 'vue-awesome/icons/pencil'
 import 'vue-awesome/icons/plus'
+import Datepicker from 'vuejs-datepicker';
 
   var componentData = {
 
@@ -150,6 +155,7 @@ import 'vue-awesome/icons/plus'
       oldBookInfo:[],
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
+      time: new Date(),
       fields: [
 	  {
 	      key: 'title',
@@ -186,6 +192,9 @@ import 'vue-awesome/icons/plus'
 
 export default {
     name: 'Landing',
+    components: {
+	Datepicker
+    },
     data () {
 	return componentData;
     },
@@ -286,10 +295,18 @@ a:-webkit-any-link {
   text-decoration: underline;
   cursor: auto;
 }
+.datepickerInput {
+  width: 6rem;
+  padding: 0rem .25rem;
+}
 
+.datepickerCalendar{
+    right:0px;
+}
 </style>
 
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 </style>
