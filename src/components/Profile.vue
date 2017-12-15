@@ -67,7 +67,7 @@
 		  <datepicker v-model="time"
 			      input-class="form-control form-control-sm datepickerInput"
 			      calendar-class="datepickerCalendar"
-			      class="d-inline-block"
+			      class="d-inline-block align-middle"
 			      ></datepicker>
 		</div>
 		<div>
