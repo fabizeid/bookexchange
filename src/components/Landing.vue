@@ -10,7 +10,7 @@
 	  <b-col class="py-2" >
 	  <!-- <a>{{data.field.label}}</a> -->
 	  <!-- size="sm" class="mh-100" float-right -->
-	  <b-dropdown   id="ddown1" text="Type" >
+	  <b-dropdown   id="ddown1" text="Filter" >
 	      <b-form-checkbox v-model="allSelected"
 	  		       :indeterminate="indeterminate"
 	  		       aria-describedby="genre"
