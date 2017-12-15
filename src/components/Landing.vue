@@ -22,7 +22,16 @@
 	  	All
 	      </b-form-checkbox>
 	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
-	    <b-form-checkbox-group id="genre"
+	      <b-form-checkbox-group id="availability"
+	  			   stacked
+	  			   v-model="selected"
+	  			   name="availability"
+	  			   :options="availability"
+	  			   class="ml-3"
+	  			   aria-label="availability"
+	  			   ></b-form-checkbox-group>
+	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
+	      <b-form-checkbox-group id="genre"
 	  			   stacked
 	  			   v-model="selected"
 	  			   name="genre"
@@ -127,6 +136,7 @@
 
       genre: ['Biography/Memoir', 'Art/Photograhy', 
 	      'History', 'Romance', 'Fiction'],
+      availability: ['Available','Reserved'],
       selected: [],
       allSelected: false,
       indeterminate: false,
@@ -153,7 +163,8 @@ export default {
 	    this.$root.$emit("bv::toggle::collapse",mid);
 	    },
 	toggleAll (checked) {
-	    this.selected = checked ? this.genre.slice() : []
+	    this.selected = checked ?
+		this.genre.slice().concat(this.availability.slice()) : []
 	},
 	filterFunc (item){
 	    let test = true;

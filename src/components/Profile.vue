@@ -55,40 +55,40 @@
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
-	    <tr>
-              <td>
-		<a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
-		<br>
-		by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a> 
-	      </td>
-              <td class="text-right">
-		<div>
-		  <small ><strong class="text-nowrap">Available on:</strong></small> 
-		  <datepicker v-model="time" v-on:input="logme('datepicked')"
-			      input-class="form-control form-control-sm datepickerInput"
-			      calendar-class="datepickerCalendar"
-			      class="d-inline-block align-middle"
-			      ></datepicker>
-		</div>
-		<div>
-		  <!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		  <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit('add-'+index,false)">
-		    <icon name="pencil"/></a>
-		  <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
-		    <icon name="trash"/></a>
-		</div>
-	      </td>
-            </tr>
+	      <tr>
+		<td>
+		  <a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
+		  <br>
+		  by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a>
+		</td>
+		<td class="text-right">
+		  <div>
+		    <small ><strong class="text-nowrap">Available on:</strong></small>
+		    <datepicker v-model="time" v-on:input="logme('datepicked')"
+				input-class="form-control form-control-sm datepickerInput"
+				calendar-class="datepickerCalendar"
+				class="d-inline-block align-middle"
+				></datepicker>
+		  </div>
+		  <div>
+		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
+		    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit('add-'+index,false)">
+		      <icon name="pencil"/></a>
+		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
+		      <icon name="trash"/></a>
+		  </div>
+		</td>
+              </tr>
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
-		  <b-collapse :id="'add-'+index" @show="makeEdit('add-'+index,index)" v-on:hidden="removeEdit('add-'+index,index)"  style="padding: .75rem;">
+		  <b-collapse :id="'add-'+index" @show="makeEdit('add-'+index,index)"
+			      v-on:hidden="removeEdit('add-'+index,index)"  style="padding: .75rem;">
 
 		    <!-- <b-form-textarea id="textarea1" -->
 		    <!-- 		     v-model="description" -->
 		    <!-- 		     placeholder="Enter something" -->
 		    <!-- 		     rows="6" -->
 		    <!-- 		     max-rows="6"></b-form-textarea> -->
-
 		    <textarea id="textarea1" class="form-control"
 		    		     placeholder="Enter something"
 		    		     rows="6"
@@ -111,23 +111,45 @@
 	    <tr>
 	      <td></td>
 	      <td>
-	      <a v-b-tooltip.hover title="Add new book" href="#" @click.prevent="toggleCollapse('add-end')" class="float-right" size="sm">
+		<a v-b-tooltip.hover title="Add new book" href="#"
+		   @click.prevent="toggleCollapse('add-end')" class="float-right" size="sm">
 		  <icon name="plus"/></a>
-		</a>
-	      </td></tr>
+	      </td>
+	    </tr>
+	    <tr>
+		<td colspan="2" style="border-top-width: 0; padding: 0;">
+		  <b-collapse :id="'add-end'"  style="padding: .75rem;">
+		    <b-form-input type="text" v-model.trim="newBook.title" placeholder="Title"/>
+		    <b-form-input type="text" v-model.trim="newBook.author" placeholder="Author"/>
+		    <textarea id="textarea1" class="form-control"
+		    		     placeholder="Enter something"
+		    		     rows="6"
+		    		     max-rows="6">{{description}}</textarea>
+
+
+		    <router-link to="/book/1230974">more info</router-link>
+		    <br><small><strong>Added on: </strong> 11/04/14</small>
+		    <br><small><strong>Added by: </strong> johnb</small>
+		    <div class="text-right mb-3">
+		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
+		      <b-button  size="sm" @click.prevent="toggleAdd('add-end')" variant="primary">Save</b-button>
+		    </div>
+	      	  </b-collapse>
+		</td>
+	      </tr>
 	  </tbody>
 	</table>
-</div>
+   </div>
 
-	<b-modal ref="confirmModal">
+   <b-modal ref="confirmModal">
 	  <pre>
 
    Are you sure you want to delete:
-   {{myBookId}}	    
+   {{myBookId}}
   "{{myBooks[myBookId].title}}"
 
 	  </pre>
-	</b-modal>
+   </b-modal>
 
   </div>
 </template>
@@ -154,6 +176,7 @@ import Datepicker from 'vuejs-datepicker';
 		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'},
 	  { title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
       oldBookInfo:[],
+      newBook: {title: '', author: '', type: '' },
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
       time: new Date(),
@@ -233,7 +256,7 @@ export default {
 	    let clickedSave = this.clickedSave;
 	    for (let i=0; i< inputEls.length; i++){
 		let element = inputEls[i];
-		element.removeAttribute("contenteditable");		
+		element.removeAttribute("contenteditable");
 		if(clickedSave){
 		    let fieldName = element.getAttribute("data-f-field");
 		    let index = Number(element.getAttribute("data-f-index"));
@@ -242,7 +265,7 @@ export default {
 		} else {
 		    element.innerHTML = element.getAttribute("data-f-oldvalue");
 		}
-		
+
 		element.removeAttribute("data-f-oldvalue");
 	    }
 	    //revert remaining non special elements
@@ -261,9 +284,9 @@ export default {
 	    //this.myBooks[id] = Object.assign({},this.oldBookInfo[id]);
 	    let to = this.myBooks[id];
 	    let from = this.oldBookInfo[id];
-	    
+
 	    //Title and author are special case and restored differently
-	    //to.title = from.title ; 
+	    //to.title = from.title ;
 	    //to.author = from.author ;
 	    to.type = from.type ;
 
@@ -276,9 +299,17 @@ export default {
 		this.clickedSave = true;
 	    else
 		this.clickedSave = false;
-	   
+
+	    this.toggleCollapse(mid);
+	},
+	toggleAdd(mid){
+	    //Add new book
+	    this.myBooks.push(Object.assign({},this.newBook));
+	    this.newBook.title = '';
+	    this.newBook.author= '';
 	    this.toggleCollapse(mid);
 	}
+
 
     }
 }
