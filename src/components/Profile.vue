@@ -215,12 +215,11 @@ export default {
 	    //get all elements with class myinput in prevous tr element
 	    //could not use closest function yet since it is experimental
 	    let inputEls =el.parentElement.parentElement.previousElementSibling.querySelectorAll(".myinput");
-
 	    let currentElem;
 	    for (let i=0; i< inputEls.length; i++){
-		currentElem = inputEls[i]; 
+		currentElem = inputEls[i];
 		currentElem.setAttribute("contenteditable",true);
-		currentElem.setAttribute("data-f-oldvalue",currentElem.innerText);
+		currentElem.setAttribute("data-f-oldvalue",currentElem.innerHTML);
 		currentElem.profVue = this;
 		//currentElem.addEventListener("input", validate);
 	    }
@@ -238,9 +237,9 @@ export default {
 		    let fieldName = element.getAttribute("data-f-field");
 		    let index = Number(element.getAttribute("data-f-index"));
 		    let profVue = element.profVue;
-		    profVue.myBooks[index][fieldName] = element.innerText;
+		    profVue.myBooks[index][fieldName] = element.innerHTML;
 		} else {
-		    element.innerText = element.getAttribute("data-f-oldvalue");
+		    element.innerHTML = element.getAttribute("data-f-oldvalue");
 		}
 		
 		element.removeAttribute("data-f-oldvalue");

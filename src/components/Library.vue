@@ -267,7 +267,7 @@ function editMe(element) {
 	currentElem.classList.add("form-control");
 	currentElem.setAttribute("contenteditable", "true");
 	currentElem.addEventListener("keydown", validate);
-	currentElem.setAttribute("data-beirut-oldvalue",currentElem.innerText);
+	currentElem.setAttribute("data-beirut-oldvalue",currentElem.innerHTML);
     }
 }
 window.editMe = editMe;
@@ -284,13 +284,13 @@ function validate(e) {
 	    let fieldName = element.getAttribute("data-f-field");
 	    console.log(docKey,fieldName);
 	    db.collection("books").doc(docKey).set(
-		{[fieldName]: element.innerText}, { merge: true }).then(function() {
+		{[fieldName]: element.innerHTML}, { merge: true }).then(function() {
 		    console.log("Document successfully set!");
 		}).catch(function(error) {
 		  console.error("Error setting document: ", error);
 		});
 	} else { //k  === 27
-	    element.innerText = element.getAttribute("data-beirut-oldvalue");
+	    element.innerHTML = element.getAttribute("data-beirut-oldvalue");
 	}
 	element.removeEventListener("keydown", validate);
 	element.setAttribute("contenteditable", "false");
