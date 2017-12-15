@@ -32,9 +32,9 @@
 	  			   ></b-form-checkbox-group>
 	  </b-dropdown>
 	  </b-col>
-	  <b-col class="py-2 text-nowrap">
+	  <b-col class="py-2 text-nowrap text-right">
 	  <a>Sort by:</a>
-	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: fit-content" v-model="sortSelected" :options="sortOptions">
+	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: 5rem;" v-model="sortSelected" :options="sortOptions">
 	  </b-form-select>
 	  </b-col>
 	</b-row>

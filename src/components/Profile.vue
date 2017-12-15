@@ -64,7 +64,7 @@
               <td class="text-right">
 		<div>
 		  <small ><strong class="text-nowrap">Available on:</strong></small> 
-		  <datepicker v-model="time"
+		  <datepicker v-model="time" v-on:input="logme('datepicked')"
 			      input-class="form-control form-control-sm datepickerInput"
 			      calendar-class="datepickerCalendar"
 			      class="d-inline-block align-middle"
@@ -137,6 +137,7 @@
 import 'vue-awesome/icons/trash'
 import 'vue-awesome/icons/pencil'
 import 'vue-awesome/icons/plus'
+// https://github.com/charliekassel/vuejs-datepicker
 import Datepicker from 'vuejs-datepicker';
 
   var componentData = {
