@@ -23,9 +23,9 @@
     </b-navbar>
     <div class="my-4 pb-3"/>
     <!-- keep-alive needed otherwise watch on rootdata.signedIn
-	 in Library.vue will not get triggered when signing
-	 out from a different route-->
-    <keep-alive include="Library">
+	 in Library.vue and Profile.vuewill not get triggered 
+	 when signing in or out from a different route-->
+    <keep-alive> 
       <router-view/>
     </keep-alive>
   </div>

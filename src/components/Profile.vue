@@ -132,25 +132,23 @@
 		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
-		      <b-button  size="sm" @click.prevent="toggleAdd('add-end')" variant="primary">Add</b-button>
+		      <b-button  size="sm" @click.prevent="addBook('add-end')" variant="primary">Add</b-button>
 		    </div>
 	      	  </b-collapse>
 		</td>
 	      </tr>
 	  </tbody>
 	</table>
-   </div>
-
-   <b-modal ref="confirmModal">
-	  <pre>
+  	<b-modal v-if="myBooks.length" ref="confirmModal">
+  	  <pre>
 
    Are you sure you want to delete:
    {{myBookId}}
   "{{myBooks[myBookId].title}}"
 
-	  </pre>
-   </b-modal>
-
+  	  </pre>
+  	</b-modal>
+   </div>
   </div>
 </template>
 
@@ -168,13 +166,7 @@ import Datepicker from 'vuejs-datepicker';
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
 		      { title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'}],
-      myBooks:[
-	  { title: 'he box', author: 'Amanda', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box', author: 'Steve', type: 'Fiction sdfsdf sdfsdf',status: 'checked out'},
-		{ title: 'The box', author: 'Keith', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box', author: 'Don', type: 'Romance',status: 'checked out'},
-		{ title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'},
-	  { title: 'The box', author: 'Susan', type: 'Fiction',status: 'checked out'}],
+      myBooks:[],
       oldBookInfo:[],
       newBook: {title: '', author: '', type: '' },
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
@@ -215,7 +207,7 @@ import Datepicker from 'vuejs-datepicker';
 
 
 export default {
-    name: 'Landing',
+    name: 'Profile',
     components: {
 	Datepicker
     },
@@ -303,27 +295,66 @@ export default {
 
 	    this.toggleCollapse(mid);
 	},
-	toggleAdd(mid){
+	addBook(mid){
 	    //Add new book
+	    let db = this.rootData.firebase.firestore();
+	    this.newBook.ownerID = this.rootData.uid;
+	    // Add to reactive array
 	    this.myBooks.push(Object.assign({},this.newBook));
+	    this.toggleCollapse(mid);
+
+	    // Add to DB
+	    db.collection("books").add(this.newBook)
+	      .then(function(docRef) {
+		  console.log("Document written with ID: ", docRef.id);
+	      })
+	      .catch(function(error) {
+		  console.error("Error adding document: ", error);
+	      });
 	    this.newBook.title = '';
 	    this.newBook.author= '';
-	    this.toggleCollapse(mid);
 	}
     },
     watch: {
 	'rootData.signedIn': function (signedIn) {
 	    if(signedIn) {
 		// User is signed in.
-
+		loadDb(this.rootData.firebase.firestore(),
+		       this.rootData.uid);
 	    } else {
-		this.$router.go(-1); //go back to previous page
+		if (this.$router.currentRoute.name == 'profile')
+		    this.$router.go(-1); //go back to previous page
+		componentData.myBooks = [];
 	    }
 	    console.log(" profile signed in "+ signedIn);
 	}
 
-	}
+    },
+    created: function(){
+	console.log("Profile created");
+	/*will only be called once when created, for subsequent 
+         signins we use the watch*/
+	if (this.rootData.signedIn)
+	    loadDb(this.rootData.firebase.firestore(),
+		   this.rootData.uid);
+    }
 }
+
+function loadDb (db,uid) {
+
+    db.collection("books").where("ownerID", "==", uid)
+     	.get()
+     	.then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+    		componentData.myBooks.push(doc.data());
+            });
+     	})
+     	.catch(function(error) {
+            console.log("Error getting documents: ", error);
+     	});
+    
+}
+
 </script>
 
 <style>

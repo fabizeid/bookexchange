@@ -205,7 +205,17 @@ export default {
 	    }
 	    console.log(" watch signed in "+ signedIn);
 	}
+    },
+    created: function(){
+	console.log("Library created");
+	/*will only be called once when created, for subsequent 
+         signins we use the watch*/
+
+	if (this.rootData.signedIn)
+	    unsubscribe =
+		    loadDb(this.rootData.firebase.firestore());
     }
+
 } //export
 
 
