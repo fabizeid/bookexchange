@@ -14,16 +14,18 @@
 	<b-nav is-nav-bar>
 	  <b-nav-item  to="/" exact>Home</b-nav-item>
 	  <b-nav-item  to="/library" exact>Browse</b-nav-item>
-	  <b-nav-item  v-if="rootData.signedIn" to="/profile" exact>Profile</b-nav-item>
+	  <transition name="fade">
+	    <b-nav-item  v-if="rootData.signedIn" to="/profile" exact>Profile</b-nav-item>
+	  </transition>
 	</b-nav>
 	<LoginButton class="ml-sm-auto mt-sm-2-down"></LoginButton>
       </b-collapse>
     </b-navbar>
     <div class="my-4 pb-3"/>
-    <!-- keep-alive needed otherwise watch on rootdata.signedIn 
-	 in Library.vue will not get triggered when signing 
+    <!-- keep-alive needed otherwise watch on rootdata.signedIn
+	 in Library.vue will not get triggered when signing
 	 out from a different route-->
-    <keep-alive include="Library"> 
+    <keep-alive include="Library">
       <router-view/>
     </keep-alive>
   </div>
@@ -56,4 +58,10 @@ export default {
 
 }
 
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0
+}
  </style>
