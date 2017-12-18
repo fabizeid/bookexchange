@@ -41,6 +41,13 @@ new Vue({
     template: '<App/>',
   /*component available in parent template*/
  // components: { Vtabl }
-  components: { App }
+    components: { App },
+    /*data used at shared state between all router views*/
+    data:  {
+	signedIn: false,
+	uid: null,
+	/*firebase: added dynamically in auth component
+	  in order not to make it reactive*/
+    } 
 })
 

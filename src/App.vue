@@ -8,19 +8,24 @@
 	<img src='./assets/read.svg' />
 	<!-- Beirut Book Exchange -->
       </b-navbar-brand>
-      
+
       <b-collapse is-nav id="nav_collapse">
 
 	<b-nav is-nav-bar>
 	  <b-nav-item  to="/" exact>Home</b-nav-item>
 	  <b-nav-item  to="/library" exact>Browse</b-nav-item>
-	  <b-nav-item  to="/profile" exact>Profile</b-nav-item>
+	  <b-nav-item  v-if="rootData.signedIn" to="/profile" exact>Profile</b-nav-item>
 	</b-nav>
 	<LoginButton class="ml-sm-auto mt-sm-2-down"></LoginButton>
       </b-collapse>
     </b-navbar>
     <div class="my-4 pb-3"/>
-    <router-view/>
+    <!-- keep-alive needed otherwise watch on rootdata.signedIn 
+	 in Library.vue will not get triggered when signing 
+	 out from a different route-->
+    <keep-alive include="Library"> 
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 <script>
@@ -30,7 +35,8 @@ import FireAuthenBtn from '@/components/FireAuthen'
 export default {
     name: 'app',
     router,
-    components: { LoginButton: FireAuthenBtn }
+    components: { LoginButton: FireAuthenBtn },
+    data() { return {rootData: this.$root.$data}}
   }
 
 </script>

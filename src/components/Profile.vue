@@ -132,7 +132,7 @@
 		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
-		      <b-button  size="sm" @click.prevent="toggleAdd('add-end')" variant="primary">Save</b-button>
+		      <b-button  size="sm" @click.prevent="toggleAdd('add-end')" variant="primary">Add</b-button>
 		    </div>
 	      	  </b-collapse>
 		</td>
@@ -220,6 +220,7 @@ export default {
 	Datepicker
     },
     data () {
+	componentData.rootData = this.$root.$data;
 	return componentData;
     },
     methods: {
@@ -309,9 +310,19 @@ export default {
 	    this.newBook.author= '';
 	    this.toggleCollapse(mid);
 	}
+    },
+    watch: {
+	'rootData.signedIn': function (signedIn) {
+	    if(signedIn) {
+		// User is signed in.
 
+	    } else {
+		this.$router.go(-1); //go back to previous page
+	    }
+	    console.log(" profile signed in "+ signedIn);
+	}
 
-    }
+	}
 }
 </script>
 

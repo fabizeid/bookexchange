@@ -24,14 +24,6 @@ require("firebase/auth");
 firebase.initializeApp(config);
 
 
-console.log('emit');
-import Vue from 'vue'
-if (window.bus === undefined) {
-    window.bus = new Vue();
-}
-window.bus.$emit('firebaseInit',firebase);
-
-let uid = null;
 var componentData = {
     signInMessage: 'Login',
     signedIn: false
@@ -39,10 +31,13 @@ var componentData = {
 
 export default {  
   name: 'FireAuthen',
-  data () {
-      return componentData;
+    data () {
+	componentData.rootData = this.$root.$data;
+	return componentData;
   },
-  
+    created: function(){
+	this.$root.$data.firebase = firebase;
+    },
    methods: {
        toggleSignIn: function() {
 	   /*https://github.com/firebase/quickstart-js/blob/master/auth/google-popup.html*/
@@ -84,15 +79,17 @@ firebase.auth().onAuthStateChanged(function(user) {
         let emailVerified = user.emailVerified;
         let photoURL = user.photoURL;
         let isAnonymous = user.isAnonymous;
-        uid = user.uid;
+        componentData.rootData.uid = user.uid;
         let providerData = user.providerData;
 	componentData.signInMessage = displayName;
 	componentData.signedIn = true;
+	componentData.rootData.signedIn = true;		
 	console.log(" state changed signed in");
     } else {
 	componentData.signInMessage = 'Login';
 	componentData.signedIn = false;
-	uid = null;
+	componentData.rootData.signedIn = false;	
+	componentData.rootData.uid = null;
 	console.log(" state changed signed out");
     }
 });

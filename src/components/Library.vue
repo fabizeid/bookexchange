@@ -1,166 +1,215 @@
+<!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
-  <!--<div class="library">-->
-  <b-container>
-    <div v-if="computedSignedIn">
-    <b-row>
-      <b-col class="my-5" v-if="false">
-        <h3>Add New Books</h3>
-        <b-form id="form"  inline v-on:submit.prevent="addBook">
-	  <b-form-group id="bookTitle" label="Title:" horizontal label-for="bookTitle">
-	    <b-form-input type="text" v-model="newBook.title"></b-form-input>
-	  </b-form-group>
-	  <b-form-group label="Author:" horizontal label-for="bookAuthor">
-	    <b-form-input type="text" id="bookAuthor" v-model="newBook.author"></b-form-input>
-	  </b-form-group>
-	  <b-form-group label="Url:" horizontal label-for="bookUrl">
-	    <b-form-input type="text" id="bookUrl" v-model="newBook.url"></b-form-input>
-	  </b-form-group>
-	  <b-button class="mt-2" type="submit">Add Book</b-button>
-        </b-form>
-      </b-col>
-      <div class="w-100"></div>
-    <b-col class="mt-5">
+  <div v-if="rootData.signedIn && booksFB.length" class="library container">
+    <div class="boxedTable">
+    <h2 id="bookTitle">Book List</h2>
+	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
+	  <b-col sm="6">
+	    <b-form-input v-model="filter" placeholder="Search author or title" />
+	  </b-col>
+	  <b-col class="py-2" >
+	  <!-- <a>{{data.field.label}}</a> -->
+	  <!-- size="sm" class="mh-100" float-right -->
+	  <b-dropdown   id="ddown1" text="Filter" >
+	      <b-form-checkbox v-model="allSelected"
+	  		       :indeterminate="indeterminate"
+	  		       aria-describedby="genre"
+	  		       aria-controls="genre"
+  		       class="ml-3"
+	  		       @change="toggleAll"
+	  		       >
+	  	{{ allSelected ? 'Un-select' : 'Select' }}
+	  	All
+	      </b-form-checkbox>
+	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
+	      <b-form-checkbox-group id="availability"
+	  			   stacked
+	  			   v-model="selected"
+	  			   name="availability"
+	  			   :options="availability"
+	  			   class="ml-3"
+	  			   aria-label="availability"
+	  			   ></b-form-checkbox-group>
+	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
+	      <b-form-checkbox-group id="genre"
+	  			   stacked
+	  			   v-model="selected"
+	  			   name="genre"
+	  			   :options="genre"
+	  			   class="ml-3"
+	  			   aria-label="Book Genre"
+	  			   ></b-form-checkbox-group>
+	  </b-dropdown>
+	  </b-col>
+	  <b-col class="py-2 text-nowrap text-right">
+	  <a>Sort by:</a>
+	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: 5rem;" v-model="sortSelected" :options="sortOptions">
+	  </b-form-select>
+	  </b-col>
+	</b-row>
+	<table class="table">
+	  <tbody>
+            <template v-for="(book, index) in filteredBooks">
+	    <tr :key="book.key">
+              <td>
+		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
+		<a v-on:click.stop.prevent="toggleCollapse('title-'+index)" href="#" class="booktitle" >
+		  {{book.title}}
+		</a>
+		<br>
+		<a>by {{book.author}}</a>
+	      </td>
+              <td class="text-right">
+		<small>
+		  <strong class="text-nowrap">Available on:</strong> 11/04/17
+		</small>
+		<br><a href="#" @click.prevent="showModal(index)" size="sm">
+		  Reserve
+		</a>
+	      </td>
+            </tr>
+	      <tr :key="book.key">
+		<td colspan="2" style="border-top-width: 0; padding: 0;">
+		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
 
-      <h1 id="bookTitle">Book List</h1>
-      <b-form-input class="w-50 my-2 ml-auto" v-model="filter" placeholder="Type to Search" />
-      <b-table v-on:input="rowsUpdated"
-	       class="table-fixed"
-	       :items="booksFB" 
-	       :fields="fields"
-	       :filter="filter"
-	       ></b-table>
-      <div v-if="!booksFB.length" style="position:absolute;top:50%;left:50%"> 
-	<i  class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-	<br/>
-	<a>Loading...</a>
-      </div>
-    </b-col>
-    </b-row>
+		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
+		    <router-link to="/book/1230974">more info</router-link>
+		    <br><small><strong>Added on: </strong> 11/04/14</small>
+		    <br><small><strong>Added by: </strong> johnb</small>
+	      	  </b-collapse>
+		</td>
+	      </tr>
+	    </template>
+	  </tbody>
+	</table>
     </div>
-  </b-container>
+
+	<b-modal ref="reserveModal">
+	  <pre>
+
+  Hello,
+  To reserve "{{booksFB[reserveId].title}}"
+  please contact: "{{booksFB[reserveId].author}}"
+
+	  </pre>
+	</b-modal>
+
+
+
+  </div>
 </template>
 
 <script>
+
 /*Should import vue before componentData otherwise for
  for some reason data will not be reactive
 */
 import Vue from 'vue'
-import 'perfect-scrollbar/css/perfect-scrollbar.css';
-import PerfectScrollbar from 'perfect-scrollbar';
-
-var db = null;
-let uid = null;
-var componentData = {
-    signInMessage: 'Login',
-    signedIn: false, 
-    booksFB: [],
-    filter: null,
-    fields: [
-	{
-	    key: 'title',
-	    label: 'Title',
-	    class: 'col-6'
-	},
-	{
-	    key: 'author',
-	    label: 'Author',
-	    sortable: true,
-	    class: 'col-6'
-	}
-    ],
-    newBook: {
-          title: '',
-          author: '',
-          url: 'http://'
-    }
-};
 
 
-console.log('recv');
-if (window.bus === undefined) {
-    window.bus = new Vue();
-}
 
-window.bus.$once('firebaseInit', function (firebase) {
-  // ...
-    console.log('firebase init',firebase);
-    db = firebase.firestore();
-    firebase.auth().onAuthStateChanged(authStateChanged);
-});
+  var componentData = {
 
+      booksFB: [],
+      filter: null,
+      genre: ['Biography/Memoir', 'Art/Photograhy',
+	      'History', 'Romance', 'Fiction'],
+      availability: ['Available','Reserved'],
+      selected: [],
+      allSelected: false,
+      indeterminate: false,
+      sortSelected: 'Default',
+      sortOptions: ['Default','Title','Author'],
+      reserveId: 0,
+  };
 
+let unsubscribe = null;
 export default {
-  name: 'library',
-  data () {
-      return componentData;
-  },
-  
-   methods: {
-      addBook: function () {
-	  let self = this;	  
-	  /*since ownerID was added here, it will not be reactive
-	  this is ok since we don't need it to trigger*/
-	  self.newBook.ownerID = uid;
-	  db.collection("books").add(self.newBook)
-	      .then(function(docRef) {
-		  self.newBook.title = '';
-		  self.newBook.author = '';
-		  self.newBook.url = 'http://';
-		  console.log("Document written with ID: ", docRef.id);
-	      })
-	      .catch(function(error) {
-		  console.error("Error adding document: ", error);
-	      });
-      },
-       removeBook: function (book) {
-	   db.collection("books").doc(book.key).delete().then(function() {
-	       console.log("Document successfully deleted!");
-	   }).catch(function(error) {
-	       console.error("Error removing document: ", error);
-	   });
-       },
-       rowsUpdated: function(){
-	   if (this.pScroll) {
-	       this.$nextTick(function(){
-		   //console.log('after adding scroll');
-		   this.pScroll.update();
-		   })
-	   }
-       }
-   },
-    computed: {
-	//Needed to make sure scrollbar is added after
-	//DOM inside the v-if is created
-	computedSignedIn: function(){
-	    this.$nextTick(function () {
-	    // Code that will run only after the
-	    // entire view has been rendered
-		if (this.signedIn){
-		    //https://github.com/utatti/perfect-scrollbar
-		    //console.log('init scrollbar');
-		    this.pScroll = new PerfectScrollbar('table tbody');
+    name: 'Library',
+    data () {
+	componentData.rootData = this.$root.$data;
+	return componentData;
+    },
+    methods: {
+	logme(m) {
+	    console.log(m);
+	},
+	showModal(mid){
+	    this.reserveId = mid;
+	    this.$refs.reserveModal.show()
+	    },
+	toggleCollapse(mid){
+	    this.$root.$emit("bv::toggle::collapse",mid);
+	    },
+	toggleAll (checked) {
+	    this.selected = checked ?
+		this.genre.slice().concat(this.availability.slice()) : []
+	},
+	filterFunc (item){
+	    let test = true;
+	    if(this.filter) {
+		let regex = new RegExp('.*' + this.filter + '.*', 'ig');
+		let itemSearchStr=[item["author"],item["title"]].join(' ');
+		test = regex.test(itemSearchStr);
+		regex.lastIndex = 0;
 		}
-	    })
-	    return this.signedIn;
+	    if(this.selected.length) {
+		test = test & (this.selected.indexOf(item["type"]) !== -1);
+	    }
+	    return test;
+	    //debugger;
+	    //console.log(i,this.filter);
+	    //console.log(i,this.selected);
+	}
+
+    },
+    computed: {
+	filteredBooks (){
+	    let orderBy = require('lodash.orderby');
+	    let self = this;
+	    let filteredBooks = self.booksFB.filter(self.filterFunc);
+            if (self.sortSelected != 'Default') {
+		console.log(self.sortSelected);
+		filteredBooks = orderBy(filteredBooks,[user => user[self.sortSelected.toLowerCase()].toLowerCase()]);
+
+	    }
+	    return filteredBooks;
 	}
     },
-    mounted(){
-	//this.$nextTick(function () {
-	    // Code that will run only after the
-	    // entire view has been rendered
-	//    console.log('mounter next tick');
-	//})
-	//console.log('add class');
-	//debugger;
-	//document.getElementById("div1")
-	//document.querySelector(".b-table tbody").className += " otherclass";
-	//var ps = new PerfectScrollbar('table tbody');
+    watch: {
+	selected (newVal, oldVal) {
+	    // Handle changes in individual flavour checkboxes
+	    if (newVal.length === 0) {
+		this.indeterminate = false
+		this.allSelected = false
+	    } else if (newVal.length === this.genre.length) {
+		this.indeterminate = false
+		this.allSelected = true
+	    } else {
+		this.indeterminate = true
+		this.allSelected = false
+	    }
+	},
+	'rootData.signedIn': function (signedIn) {
+	    if(signedIn) {
+		// User is signed in.
+		if(!unsubscribe) unsubscribe =
+		    loadDb(this.rootData.firebase.firestore());
+	    } else {
+		// User is signed out.
+		if (unsubscribe) {
+		    unsubscribe();
+		    unsubscribe = null
+		}
+		componentData.booksFB = [];
+	    }
+	    console.log(" watch signed in "+ signedIn);
+	}
     }
+} //export
 
-}
 
-
-/*consider init app in window.onload if will be manipulating DOM 
+/*consider init app in window.onload if will be manipulating DOM
  see: https://stackoverflow.com/questions/20180251/when-to-use-window-onload
  window.onload = function() {
       initApp();
@@ -168,40 +217,8 @@ export default {
 //validation: https://vuejs.org/v2/examples/firebase.html
 */
 
-var unsubscribe = null;
 
-
-
-function authStateChanged(user) {
-    if (user) {
-        // User is signed in.
-        let displayName = user.displayName.split(" ", 1)[0];	
-        let email = user.email;
-        let emailVerified = user.emailVerified;
-        let photoURL = user.photoURL;
-        let isAnonymous = user.isAnonymous;
-        uid = user.uid;
-        let providerData = user.providerData;
-	componentData.signInMessage = displayName;
-	componentData.signedIn = true;
-	if(!unsubscribe) unsubscribe = loadDb();
-	console.log(" state changed signed in 2");
-    } else {
-        // User is signed out.
-	if (unsubscribe) {
-	    unsubscribe();
-	    unsubscribe = null
-	}
-	componentData.booksFB = [];
-	componentData.signInMessage = 'Login';
-	componentData.signedIn = false;
-	uid = null;
-	console.log(" state changed signed out 2");
-    }
-};
-
-
-function loadDb () {
+function loadDb (db) {
 return db.collection("books")
     .onSnapshot(function(snapshot) {
         snapshot.docChanges.forEach(function(change) {
@@ -229,102 +246,54 @@ return db.collection("books")
         });
     });
 }
-/**
- * Find the index for an object with given key.
- *
- * @param {array} array
- * @param {string} key
- * @return {number}
- */
-function indexForKey (array, key) {
-  for (let i = 0; i < array.length; i++) {
-    if (array[i].key === key) {
-      return i
-    }
-  }
-}
-
-
-/*
-To use persistent variables I could use closures 
-or properties as described in
-https://stackoverflow.com/questions/1535631/static-variables-in-javascript
-
-
-Defining in global space (window members) so that it could be found by onclick event. 
-Did not use v-on click since I don't want vue to make the editable 
-variable reactive. Also could not add an event listener on all rows
-of table since table is dynamic.
-*/
-function editMe(element) {
-    console.log(element);
-    /*taverse tree sidewase and assign to all siblings with editable attribute*/
-    //.classList.remove("form-control");
-    let rowElms = element.parentElement.parentElement.querySelectorAll(".editable");
-    let currentElem;
-    for (let i=0 ; i < rowElms.length;i++) {
-	currentElem = rowElms[i]; 
-	currentElem.classList.add("form-control");
-	currentElem.setAttribute("contenteditable", "true");
-	currentElem.addEventListener("keydown", validate);
-	currentElem.setAttribute("data-beirut-oldvalue",currentElem.innerHTML);
-    }
-}
-window.editMe = editMe;
-
-
-function validate(e) {
-
-    let k = e.keyCode;
-    if (k === 13 || k === 27){
-	let element = e.target;
-	e.preventDefault();
-	if(k === 13) {
-	    let docKey = element.getAttribute("data-f-key");
-	    let fieldName = element.getAttribute("data-f-field");
-	    console.log(docKey,fieldName);
-	    db.collection("books").doc(docKey).set(
-		{[fieldName]: element.innerHTML}, { merge: true }).then(function() {
-		    console.log("Document successfully set!");
-		}).catch(function(error) {
-		  console.error("Error setting document: ", error);
-		});
-	} else { //k  === 27
-	    element.innerHTML = element.getAttribute("data-beirut-oldvalue");
-	}
-	element.removeEventListener("keydown", validate);
-	element.setAttribute("contenteditable", "false");
-	element.classList.remove("form-control");
-    }
-}
 
 </script>
 
-<!-- Scoped style did not affect table
-   following style is needed to have a scrollable table with fixed header
-  PS: don't forget to adjust the col class for the fields
-  Essentially by changing the display to block and using the col classes
-  for the items, we are not using a table anymore but bootstrap grids-->
-
 <style>
-.table-fixed {
-    width: 100%;
+
+#ddown1{
+    font-weight: initial;
 }
-.table-fixed tbody {
-  height: 200px;
-  width: 100%;
-  position: relative; /*needed by scroller*/
+#ddown1__BV_toggle_ {
+    background-color: transparent;
+    color: black;
+    padding: .8rem .2rem;
+    /*line-height: 1;*/
+    font-weight: bold;
+    padding-bottom: 2px;
+    border: 0px;
+    padding-top: 0rem;
+
+
 }
 
-.table-fixed thead, .table-fixed tbody , .table-fixed tr, .table-fixed td, .table-fixed th{
-  display: block;
+/* a:{ */
+/*     text-decoration: none; */
+/* } */
+
+/* a:hover { */
+/*     text-decoration: underline; */
+/*     color: #333333; */
+/* } */
+
+a:any-link {
+  text-decoration: underline;
+  cursor: auto;
 }
 
-.table-fixed tbody td {
-  float: left;
+/* WebKit browsers */
+a:-webkit-any-link {
+  text-decoration: underline;
+  cursor: auto;
 }
- .table-fixed thead > tr> th {
-     float:left;
+
+#selectbg {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cdd6db+0,cdd6db+49,afbdc6+51,dee7ed+100 */
+background: rgb(205,214,219); /* Old browsers */
+background: -moz-linear-gradient(top, rgba(205,214,219,1) 0%, rgba(205,214,219,1) 49%, rgba(175,189,198,1) 51%, rgba(222,231,237,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, rgba(205,214,219,1) 0%,rgba(205,214,219,1) 49%,rgba(175,189,198,1) 51%,rgba(222,231,237,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdd6db', endColorstr='#dee7ed',GradientType=0 ); /* IE6-9 */
 }
 
 </style>
@@ -332,21 +301,5 @@ function validate(e) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-/* force input to be within parent's bounds */
-    form input {
-        max-width: 100%;
-	/*background-color: yellow;*/
-    } 
-
-#bookTitle {
-    -ms-transform: rotate(20deg); /* IE 9 */
-    -webkit-transform: rotate(20deg); /* Safari */
-    transform: rotate(20deg); /* Standard syntax */
-    font-family: "Tangerine";
-    font-weight: 600;
-    text-shadow: 4px 4px 4px #aaa;
-    width: fit-content;
-}
 
 </style>
-
