@@ -257,6 +257,21 @@ return db.collection("books")
     });
 }
 
+/**
+ * Find the index for an object with given key.
+ *
+ * @param {array} array
+ * @param {string} key
+ * @return {number}
+ */
+function indexForKey (array, key) {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].key === key) {
+      return i
+    }
+  }
+}
+
 </script>
 
 <style>

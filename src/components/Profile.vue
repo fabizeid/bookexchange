@@ -139,12 +139,12 @@
 	      </tr>
 	  </tbody>
 	</table>
-  	<b-modal v-if="myBooks.length" ref="confirmModal">
+  	<b-modal v-if="myBooks.length" ref="confirmModal" @ok="removeBook(myBookId)">
   	  <pre>
 
    Are you sure you want to delete:
    {{myBookId}}
-  "{{myBooks[myBookId].title}}"
+  "{{(myBookId>myBooks.length-1)?'undef':myBooks[myBookId].title}}"
 
   	  </pre>
   	</b-modal>
@@ -302,10 +302,11 @@ export default {
 	    // Add to reactive array
 	    this.myBooks.push(Object.assign({},this.newBook));
 	    this.toggleCollapse(mid);
-
+	    let self = this;
 	    // Add to DB
 	    db.collection("books").add(this.newBook)
-	      .then(function(docRef) {
+		.then(function(docRef) {
+		  self.myBooks[self.myBooks.length-1].key = docRef.id; 
 		  console.log("Document written with ID: ", docRef.id);
 	      })
 	      .catch(function(error) {
@@ -313,7 +314,22 @@ export default {
 	      });
 	    this.newBook.title = '';
 	    this.newBook.author= '';
+	},
+	removeBook: function (bid) {
+
+	    let db = this.rootData.firebase.firestore();
+	    let key = this.myBooks[bid].key;
+	    //remove from reactive variable
+	    this.myBooks.splice(bid,1);
+	    //remove from DB
+	    db.collection("books").doc(key).delete().then(function() {		
+		console.log("Document successfully deleted!");
+	    }).catch(function(error) {
+		console.error("Error removing document: ", error);
+	    });
+	    
 	}
+
     },
     watch: {
 	'rootData.signedIn': function (signedIn) {
@@ -346,7 +362,10 @@ function loadDb (db,uid) {
      	.get()
      	.then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
-    		componentData.myBooks.push(doc.data());
+		let dt = doc.data();
+		let key = doc.id;
+		dt.key = key;
+		componentData.myBooks.push(dt);
             });
      	})
      	.catch(function(error) {
