@@ -72,7 +72,7 @@
 		  </div>
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit('add-'+index,false)">
+		    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
 		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
 		      <icon name="trash"/></a>
@@ -101,8 +101,8 @@
 		    <!-- <input  type="date">11/04/17</input> -->
 		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
-		      <b-button  size="sm" @click.prevent="toggleEdit('add-'+index,false)">Cancel</b-button>
-		      <b-button  size="sm" @click.prevent="toggleEdit('add-'+index,true)" variant="primary">Save</b-button>
+		      <b-button  size="sm" @click.prevent="toggleEdit(index,false)">Cancel</b-button>
+		      <b-button  size="sm" @click.prevent="toggleEdit(index,true)" variant="primary">Save</b-button>
 		    </div>
 	      	  </b-collapse>
 		</td>
@@ -139,12 +139,19 @@
 	      </tr>
 	  </tbody>
 	</table>
+	<div v-if="!myBooks.length" style="position:absolute;top:50%;left:50%"> 
+	  <icon name="spinner" scale="3" pulse/> <!-- class="fa-fw" -->
+	  <br/>
+	  <a>Loading...</a>
+	</div>
+
   	<b-modal v-if="myBooks.length" ref="confirmModal" @ok="removeBook(myBookId)">
   	  <pre>
 
    Are you sure you want to delete:
    {{myBookId}}
-  "{{(myBookId>myBooks.length-1)?'undef':myBooks[myBookId].title}}"
+   <!-- The following statement was introducing bugs in emacs indentation -->
+  <!-- "{{(myBookId>myBooks.length-1)?'undef':myBooks[myBookId].title}}" -->
 
   	  </pre>
   	</b-modal>
@@ -157,10 +164,11 @@
 import 'vue-awesome/icons/trash'
 import 'vue-awesome/icons/pencil'
 import 'vue-awesome/icons/plus'
+import 'vue-awesome/icons/spinner'
 // https://github.com/charliekassel/vuejs-datepicker
 import Datepicker from 'vuejs-datepicker';
 
-  var componentData = {
+var componentData = {
 
       reservedBooks: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
@@ -237,7 +245,6 @@ export default {
 		currentElem = inputEls[i];
 		currentElem.setAttribute("contenteditable",true);
 		currentElem.setAttribute("data-f-oldvalue",currentElem.innerHTML);
-		currentElem.profVue = this;
 		//currentElem.addEventListener("input", validate);
 	    }
 	    this.backupBook(id);
@@ -253,16 +260,33 @@ export default {
 		if(clickedSave){
 		    let fieldName = element.getAttribute("data-f-field");
 		    let index = Number(element.getAttribute("data-f-index"));
-		    let profVue = element.profVue;
-		    profVue.myBooks[index][fieldName] = element.innerHTML;
+                   console.log("el id: "+index+" "+element.innerHTML);
+		    this.myBooks[index][fieldName] = element.innerHTML;                    
 		} else {
 		    element.innerHTML = element.getAttribute("data-f-oldvalue");
 		}
 
 		element.removeAttribute("data-f-oldvalue");
 	    }
-	    //revert remaining non special elements
-	    if(!clickedSave) //revert
+
+	    if(clickedSave){
+               let db = this.rootData.firebase.firestore();
+               let key = this.myBooks[id].key;
+               let self = this;
+                console.log("id: "+id+" "+self.myBooks[id].title);
+               db.collection("books").doc(key).update({
+                   title: self.myBooks[id].title,
+                   author: self.myBooks[id].author 
+                }).then(function() {
+                  console.log("Document successfully updated!");
+                 })
+                 .catch(function(error) {
+                     // The document probably doesn't exist.
+                   console.error("Error updating document: ", error);
+               });
+
+            } 
+            else //revert remaining non special elements
 	     {
 		 this.restoreBook(id);
 	     }
@@ -287,13 +311,14 @@ export default {
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
 	},
-	toggleEdit(mid,save){
-	    if(save)
-		this.clickedSave = true;
-	    else
+        toggleEdit(bid,save){
+            if(save){ // Update Book
+               this.clickedSave = true;
+            }
+	    else{
 		this.clickedSave = false;
-
-	    this.toggleCollapse(mid);
+            }
+	    this.toggleCollapse('add-'+ bid);
 	},
 	addBook(mid){
 	    //Add new book

@@ -1,8 +1,8 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <template>
-  <div v-if="rootData.signedIn && booksFB.length" class="library container">
+  <div v-if="rootData.signedIn" class="library container">
     <div class="boxedTable">
-    <h2 id="bookTitle">Book List</h2>
+      <h2 id="bookTitle">Book List</h2>
 	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
 	  <b-col sm="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
@@ -82,14 +82,19 @@
 	    </template>
 	  </tbody>
 	</table>
+	<div v-if="!booksFB.length" style="position:absolute;top:80%;left:50%"> 
+	  <icon name="spinner" scale="3" pulse/> <!-- class="fa-fw" -->
+	  <br/>
+	  <a>Loading...</a>
+	</div>	
     </div>
 
 	<b-modal ref="reserveModal">
 	  <pre>
 
   Hello,
-  To reserve "{{booksFB[reserveId].title}}"
-  please contact: "{{booksFB[reserveId].author}}"
+  To reserve "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].title}}"
+  please contact: "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].author}}"
 
 	  </pre>
 	</b-modal>
@@ -101,10 +106,7 @@
 
 <script>
 
-/*Should import vue before componentData otherwise for
- for some reason data will not be reactive
-*/
-import Vue from 'vue'
+import 'vue-awesome/icons/spinner'
 
 
 
