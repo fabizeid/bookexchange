@@ -139,7 +139,7 @@
 	      </tr>
 	  </tbody>
 	</table>
-	<div v-if="!myBooks.length" style="position:absolute;top:50%;left:50%"> 
+	<div v-if="loading" style="position:absolute;top:50%;left:50%">
 	  <icon name="spinner" scale="3" pulse/> <!-- class="fa-fw" -->
 	  <br/>
 	  <a>Loading...</a>
@@ -210,7 +210,8 @@ var componentData = {
       sortSelected: 'Default',
       sortOptions: ['Default','Title','Author'],
       reserveId: 0,
-      myBookId: 0
+      myBookId: 0,
+      loading: false
   };
 
 
@@ -260,8 +261,7 @@ export default {
 		if(clickedSave){
 		    let fieldName = element.getAttribute("data-f-field");
 		    let index = Number(element.getAttribute("data-f-index"));
-                   console.log("el id: "+index+" "+element.innerHTML);
-		    this.myBooks[index][fieldName] = element.innerHTML;                    
+		    this.myBooks[index][fieldName] = element.innerHTML;
 		} else {
 		    element.innerHTML = element.getAttribute("data-f-oldvalue");
 		}
@@ -273,10 +273,9 @@ export default {
                let db = this.rootData.firebase.firestore();
                let key = this.myBooks[id].key;
                let self = this;
-                console.log("id: "+id+" "+self.myBooks[id].title);
                db.collection("books").doc(key).update({
                    title: self.myBooks[id].title,
-                   author: self.myBooks[id].author 
+                   author: self.myBooks[id].author
                 }).then(function() {
                   console.log("Document successfully updated!");
                  })
@@ -285,7 +284,7 @@ export default {
                    console.error("Error updating document: ", error);
                });
 
-            } 
+            }
             else //revert remaining non special elements
 	     {
 		 this.restoreBook(id);
@@ -331,7 +330,7 @@ export default {
 	    // Add to DB
 	    db.collection("books").add(this.newBook)
 		.then(function(docRef) {
-		  self.myBooks[self.myBooks.length-1].key = docRef.id; 
+		  self.myBooks[self.myBooks.length-1].key = docRef.id;
 		  console.log("Document written with ID: ", docRef.id);
 	      })
 	      .catch(function(error) {
@@ -347,12 +346,12 @@ export default {
 	    //remove from reactive variable
 	    this.myBooks.splice(bid,1);
 	    //remove from DB
-	    db.collection("books").doc(key).delete().then(function() {		
+	    db.collection("books").doc(key).delete().then(function() {
 		console.log("Document successfully deleted!");
 	    }).catch(function(error) {
 		console.error("Error removing document: ", error);
 	    });
-	    
+
 	}
 
     },
@@ -373,7 +372,7 @@ export default {
     },
     created: function(){
 	console.log("Profile created");
-	/*will only be called once when created, for subsequent 
+	/*will only be called once when created, for subsequent
          signins we use the watch*/
 	if (this.rootData.signedIn)
 	    loadDb(this.rootData.firebase.firestore(),
@@ -382,21 +381,22 @@ export default {
 }
 
 function loadDb (db,uid) {
-
+    componentData.loading = true;
     db.collection("books").where("ownerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
+	    querySnapshot.forEach(function(doc) {
 		let dt = doc.data();
 		let key = doc.id;
 		dt.key = key;
 		componentData.myBooks.push(dt);
             });
+	    componentData.loading = false;
      	})
      	.catch(function(error) {
             console.log("Error getting documents: ", error);
      	});
-    
+
 }
 
 </script>

@@ -82,19 +82,19 @@
 	    </template>
 	  </tbody>
 	</table>
-	<div v-if="!booksFB.length" style="position:absolute;top:80%;left:50%"> 
+	<div v-if="loading" style="position:absolute;top:80%;left:50%">
 	  <icon name="spinner" scale="3" pulse/> <!-- class="fa-fw" -->
 	  <br/>
 	  <a>Loading...</a>
-	</div>	
+	</div>
     </div>
 
 	<b-modal ref="reserveModal">
 	  <pre>
 
   Hello,
-  To reserve "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].title}}"
-  please contact: "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].author}}"
+  <!-- To reserve "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].title}}" -->
+  <!-- please contact: "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].author}}" -->
 
 	  </pre>
 	</b-modal>
@@ -123,6 +123,7 @@ import 'vue-awesome/icons/spinner'
       sortSelected: 'Default',
       sortOptions: ['Default','Title','Author'],
       reserveId: 0,
+      loading: false
   };
 
 let unsubscribe = null;
@@ -210,7 +211,7 @@ export default {
     },
     created: function(){
 	console.log("Library created");
-	/*will only be called once when created, for subsequent 
+	/*will only be called once when created, for subsequent
          signins we use the watch*/
 
 	if (this.rootData.signedIn)
@@ -231,32 +232,33 @@ export default {
 
 
 function loadDb (db) {
-return db.collection("books")
-    .onSnapshot(function(snapshot) {
-        snapshot.docChanges.forEach(function(change) {
-	    let dt = change.doc.data();
-	    let key = change.doc.id;
-
-	    dt.key = key;
-            if (change.type === "added") {
-		componentData.booksFB.push(dt);
-                console.log("New: ", key);
-            } else {
-		let index = indexForKey (componentData.booksFB, key);
-		if (change.type === "modified") {
-		    /*Can't use indexing as Vue will not trigger*/
-		    componentData.booksFB.splice(index,1,dt);
-                    console.log("Modified : ", key);
+    componentData.loading = true;
+    return db.collection("books")
+	.onSnapshot(function(snapshot) {
+            snapshot.docChanges.forEach(function(change) {
+		let dt = change.doc.data();
+		let key = change.doc.id;
+		dt.key = key;
+		if (change.type === "added") {
+		    componentData.booksFB.push(dt);
+                    console.log("New: ", key);
 		} else {
-		    if (change.type === "removed") {
-			componentData.booksFB.splice(index,1 );
-			console.log("Removed: ", key);
+		    let index = indexForKey (componentData.booksFB, key);
+		    if (change.type === "modified") {
+			/*Can't use indexing as Vue will not trigger*/
+			componentData.booksFB.splice(index,1,dt);
+			console.log("Modified : ", key);
+		    } else {
+			if (change.type === "removed") {
+			    componentData.booksFB.splice(index,1 );
+			    console.log("Removed: ", key);
+			}
 		    }
-		}
 
-	    }
-        });
-    });
+		}
+            });
+	    componentData.loading = false;
+	});
 }
 
 /**
