@@ -9,7 +9,7 @@
 	    <tr>
               <td>
 		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		<a v-on:click.stop.prevent="toggleCollapse('title-'+index)" href="#" class="booktitle" >
+		<a v-on:click.stop.prevent="toggleCollapse('titleProf-'+index)" href="#" class="booktitle" >
 		  {{book.title}}
 		</a>
 		<br>
@@ -26,7 +26,7 @@
             </tr>
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
-		  <b-collapse :id="'title-'+index" style="padding: .75rem;">
+		  <b-collapse :id="'titleProf-'+index" style="padding: .75rem;">
 
 		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
 		    <router-link to="/book/1230974">more info</router-link>

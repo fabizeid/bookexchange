@@ -20,9 +20,24 @@ npm run build --report
 # 
 firebase deploy
 firebase deploy --only firestore:rules
-
 firebase serve (for local server)
 
+#debugging node
+node --inspect --debug-brk build/dev-server.js
+or set it up in script of package.json:     "dbg": "node --inspect --debug-brk build/dev-server.js",
+or kill -SIGUSR1 nodejs_pid
+then chrome://inspect
+
+#for functions cd functions directory and:
+# for https triggered functions
+ "npm run serve": "firebase serve --only functions",
+# for everything else
+"npm run shell": "firebase experimental:functions:shell",
+ "npm run start": "npm run shell",
+ "npm run deploy": "firebase deploy --only functions",
+ "npm run logs": "firebase functions:log"
+
+firebase deploy --only functions:function1,functions:function2
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
