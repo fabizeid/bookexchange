@@ -1,43 +1,65 @@
+//  // Create and Deploy Your First Cloud Functions
+//  // https://firebase.google.com/docs/functions/write-firebase-functions
+//  //https://github.com/firebase/functions-samples/blob/master/quickstarts/uppercase-firestore/functions/index.js
+//  exports.helloWorld = functions.https.onRequest((request, response) => {
+//      response.send("Hello from Firebase!");
+//  });
+
 const functions = require('firebase-functions');
-
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
-
- // Create and Deploy Your First Cloud Functions
- // https://firebase.google.com/docs/functions/write-firebase-functions
 
 
-//https://github.com/firebase/functions-samples/blob/master/quickstarts/uppercase-firestore/functions/index.js
+/***********************************************************************
+ If running from local server we need to give priviledge to that server,
+ in order to allow access to firebase. For more details:
+ https://firebase.google.com/docs/admin/setup
+ might be a bug:
+https://stackoverflow.com/questions/44766536/how-do-you-setup-local-environment-variables-for-cloud-functions-for-firebase
+***********************************************************************/
+//adminsdk.json generated as described in setup
+//file should not be saved publicly
+const certFile = './adminsdk.json';
 
- exports.helloWorld = functions.https.onRequest((request, response) => {
-     //debugger;
-     response.send("Hello from Firebase!");
- });
+try {
+    const serviceAccount = require(certFile); 
+    console.log('local server');
+    admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: 'https://bookexchange-beirut.firebaseio.com'
+    });
+}
+/***********************************************************************
+  For deployement we don't need the above, since it will be deployed in
+  a privileged server.
+***********************************************************************/
+// certFile not found, which means we are deployed
+catch(e) {
+    admin.initializeApp(functions.config().firebase);
+}
+/***********************************************************************/
 
+// To test cd function, npm start, then:
+// addUser({email: 'foo@bar.com', displayName: 'foobar', uid: 'uid1'})
 exports.addUser = functions.auth.user().onCreate(event => {
-    // ...
-    console.log("user created "+ JSON.stringify(event));
-    // const user = event.data;
-    // const email = user.email; // The email of the user.
-    // const displayName = user.displayName; // The display name of the user.
-    // const uid = user.uid;
-    const original = 'nnnn';
-    
-    return admin.firestore().collection('messages').add({original: original}).
-	then(writeResult => {
-	    // Send back a message that we've succesfully written the message
-	    //res.json({result: `Message with ID: ${writeResult.id} added.`});
-	    console.log('Added to DB '+ writeResult);
-	}).catch(function(error) {
-		   console.error("Error sign in: ", error);
+    const user = event.data;
+    return admin.firestore().collection('users')
+	.doc(user.uid).set({email: user.email,
+			   name: user.displayName
+			  })
+	.then(writeResult => {
+	   // console.log('Added user to DB '+ writeResult);
+	})
+	.catch(function(error) {
+	    console.error("Error creating user record: ", error);
 	});
 });
 
 exports.deleteUser = functions.auth.user().onDelete(event => {
-    // ...
-    console.log("user removed "+ JSON.stringify(event));
-    // const user = event.data;
-    // const email = user.email; // The email of the user.
-    // const displayName = user.displayName; // The display name of the user.
-    // const uid = user.uid;
+    const user = event.data;
+    return admin.firestore().collection('users')
+	.doc(user.uid).delete().then(function() {
+	    //console.log("Document successfully deleted!");
+	}).catch(function(error) {
+	    console.error("Error removing document: ", error);
+	});    
 });
