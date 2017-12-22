@@ -53,7 +53,7 @@
 	    <tr :key="book.key">
               <td>
 		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		<a v-on:click.stop.prevent="toggleCollapse('titleLib-'+index)" href="#" class="booktitle" >
+		<a class="booktitle" >
 		  {{book.title}}
 		</a>
 		<br>
@@ -70,13 +70,13 @@
             </tr>
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
-		  <b-collapse :id="'titleLib-'+index" style="padding: .75rem;">
-
-		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
+		  <div style="padding: .75rem;">
+		    <truncate class="truncate" clamp=" Read more" :length="400" less="Read less" text=
+		    "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp" />
 		    <router-link to="/book/1230974">more info</router-link>
 		    <br><small><strong>Added on: </strong> 11/04/14</small>
 		    <br><small><strong>Added by: </strong> johnb</small>
-	      	  </b-collapse>
+	      	  </div> <!-- b-collapse -->
 		</td>
 	      </tr>
 	    </template>
@@ -107,7 +107,7 @@
 <script>
 
 import 'vue-awesome/icons/spinner'
-
+import truncate from 'vue-truncate-collapsed';
 
 
   var componentData = {
@@ -129,6 +129,7 @@ import 'vue-awesome/icons/spinner'
 let unsubscribe = null;
 export default {
     name: 'Library',
+    components: { truncate },
     data () {
 	componentData.rootData = this.$root.$data;
 	return componentData;
@@ -140,9 +141,6 @@ export default {
 	showModal(mid){
 	    this.reserveId = mid;
 	    this.$refs.reserveModal.show()
-	    },
-	toggleCollapse(mid){
-	    this.$root.$emit("bv::toggle::collapse",mid);
 	    },
 	toggleAll (checked) {
 	    this.selected = checked ?

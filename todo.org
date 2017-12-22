@@ -1,0 +1,24 @@
+
+Remaining todos:
+
+* Home:
+
+* Library:
+  - click reserve: open modal showing email address of owner
+    - click ok:
+      - close modal
+      - change reserve to unreserve
+        - tooltip:  Cancel pending reservation
+      - new entry in Profile -> pending reservations table
+      - book owner gets notification: reservation request
+      - book owner has current user added to list of possible
+  - click unreserve: open modal asking if you are sure
+    - click ok:
+      - close modal
+      - change unreserve to reserve
+      - book owner gets notification: reservation cancelled
+      - book owner has current user removed from list of possible
+
+
+
+* Profile:

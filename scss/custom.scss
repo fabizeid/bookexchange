@@ -60,6 +60,14 @@ a {
 .btn .fa-icon:last-child {
     margin-right: 0;
 }
+
+.truncate > p > a {
+    color: blue !important;
+    font-size: 80%;
+}
+.truncate > p > a:hover {
+    text-decoration: underline !important;
+}
 /* * { */
 /*     font-family: "Merriweather", serif; */
 /* } */
