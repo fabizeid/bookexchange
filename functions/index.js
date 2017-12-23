@@ -63,3 +63,13 @@ exports.deleteUser = functions.auth.user().onDelete(event => {
 	    console.error("Error removing document: ", error);
 	});    
 });
+
+//createBook({title: 'foo@'}, {params: {bookId: 'aaa'}})
+exports.createBook = functions.firestore
+  .document('books/{bookId}')
+    .onCreate(event => {
+      return event.data.ref.set({
+          //https://stackoverflow.com/questions/47270773/how-to-get-current-user-id-in-firebase-cloud-functions-with-firestore-trigger
+          createdTime: event.data.createTime
+      }, {merge: true});
+  });

@@ -323,10 +323,12 @@ export default {
 	    //Add new book
 	    let db = this.rootData.firebase.firestore();
 	    this.newBook.ownerID = this.rootData.uid;
+            this.newBook.ownerName = this.rootData.name;
 	    // Add to reactive array
 	    this.myBooks.push(Object.assign({},this.newBook));
 	    this.toggleCollapse(mid);
 	    let self = this;
+
 	    // Add to DB
 	    db.collection("books").add(this.newBook)
 		.then(function(docRef) {

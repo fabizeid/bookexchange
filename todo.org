@@ -18,7 +18,11 @@ Remaining todos:
       - change unreserve to reserve
       - book owner gets notification: reservation cancelled
       - book owner has current user removed from list of possible
+  - click extend reservation:
 
 
 
 * Profile:
+  - show books borrowed by others
+  - highlight background of books past due
+

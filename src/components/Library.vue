@@ -52,7 +52,6 @@
             <template v-for="(book, index) in filteredBooks">
 	    <tr :key="book.key">
               <td>
-		<!-- stop.prevent added to avoid scrolling to top after collapsing -->
 		<a class="booktitle" >
 		  {{book.title}}
 		</a>
@@ -74,8 +73,8 @@
 		    <truncate class="truncate" clamp=" Read more" :length="400" less="Read less" text=
 		    "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp" />
 		    <router-link to="/book/1230974">more info</router-link>
-		    <br><small><strong>Added on: </strong> 11/04/14</small>
-		    <br><small><strong>Added by: </strong> johnb</small>
+		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
+		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </div> <!-- b-collapse -->
 		</td>
 	      </tr>
@@ -237,6 +236,7 @@ function loadDb (db) {
 		let dt = change.doc.data();
 		let key = change.doc.id;
 		dt.key = key;
+                dt.createdDate = new Date(dt.createdTime).toLocaleDateString();
 		if (change.type === "added") {
 		    componentData.booksFB.push(dt);
                     console.log("New: ", key);
