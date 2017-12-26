@@ -7,7 +7,15 @@ service cloud.firestore {
         allow read, create: if request.auth != null;
 	allow update, delete: if request.auth.uid == resource.data.ownerID;
     }
+
+    match /pendingResrv/{currentResrv} {
+        allow read, create: if request.auth != null;
+        // Allow only owner of book or the requestor to edit or delete the
+        // current waiting list
+        allow update, delete: if request.auth.uid == resource.data.borrowerID
+              || request.auth.uid == resource.data.ownerID;
+    }
     //TODO: Allow read anonymously except for owner IDs and email info
-    
+
   }
 }

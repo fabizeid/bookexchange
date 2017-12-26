@@ -8,7 +8,10 @@
     "dev": "node build/dev-server.js",
     "dbg": "node --inspect --debug-brk build/dev-server.js",
     "start": "npm run dev",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "serve": "firebase serve",
+    "deploy": "firebase deploy --only hosting",
+    "deployrules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "firebase": "^4.5.1",

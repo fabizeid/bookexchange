@@ -1,4 +1,5 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
+<!-- Check logs of functions for filtering/searching -->
 <template>
   <div v-if="rootData.signedIn" class="library container">
     <div class="boxedTable">
@@ -62,7 +63,11 @@
 		<small>
 		  <strong class="text-nowrap">Available on:</strong> 11/04/17
 		</small>
-		<br><a href="#" @click.prevent="showModal(index)" size="sm">
+		<br>
+                <a v-if="pendingRes[book.key]" href="#" @click.prevent="showModal(book,'unreserve')" size="sm">
+		  Pending
+		</a>
+                <a v-else href="#" @click.prevent="showModal(book,'reserve')" size="sm">
 		  Reserve
 		</a>
 	      </td>
@@ -88,16 +93,20 @@
 	</div>
     </div>
 
-	<b-modal ref="reserveModal">
+	<b-modal ref="reserveModal" @ok="reserveBook()">
 	  <pre>
 
-  Hello,
-  <!-- To reserve "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].title}}" -->
-  <!-- please contact: "{{(reserveId>booksFB.length-1)?'undef':booksFB[reserveId].author}}" -->
-
+       Reserve book
+         "{{selectedBook.title}}" by {{selectedBook.author}}?
 	  </pre>
 	</b-modal>
 
+	<b-modal ref="unreserveModal" @ok="unreserveBook()">
+	  <pre>
+        Cancel reservation of
+           "{{selectedBook.title}}" by {{selectedBook.author}}?
+	  </pre>
+	</b-modal>
 
 
   </div>
@@ -109,38 +118,86 @@ import 'vue-awesome/icons/spinner'
 import truncate from 'vue-truncate-collapsed';
 
 
-  var componentData = {
+let reactiveData = {
 
-      booksFB: [],
-      filter: null,
-      genre: ['Biography/Memoir', 'Art/Photograhy',
+    booksFB: [],
+    pendingRes: {},
+    filter: null,
+    selected: [],
+    allSelected: false,
+    indeterminate: false,
+    sortSelected: 'Default',
+    loading: false,
+    selectedBook: {}
+};
+
+let nonreactiveData = {
+    genre: ['Biography/Memoir', 'Art/Photograhy',
 	      'History', 'Romance', 'Fiction'],
-      availability: ['Available','Reserved'],
-      selected: [],
-      allSelected: false,
-      indeterminate: false,
-      sortSelected: 'Default',
-      sortOptions: ['Default','Title','Author'],
-      reserveId: 0,
-      loading: false
-  };
-
+    availability: ['Available','Reserved'],
+    sortOptions: ['Default','Title','Author']
+    }
 let unsubscribe = null;
 export default {
     name: 'Library',
     components: { truncate },
     data () {
-	componentData.rootData = this.$root.$data;
-	return componentData;
+	reactiveData.rootData = this.$root.$data;
+	return reactiveData;
     },
     methods: {
 	logme(m) {
 	    console.log(m);
 	},
-	showModal(mid){
-	    this.reserveId = mid;
-	    this.$refs.reserveModal.show()
-	    },
+	showModal(book,type){
+	    this.selectedBook = book;
+            if (type == "reserve")
+	        this.$refs.reserveModal.show()
+            else if (type == "unreserve")
+                this.$refs.unreserveModal.show()
+	},
+        reserveBook(){
+            let db = this.rootData.firebase.firestore();
+            let book = this.selectedBook;
+            self = this;
+            db.collection("pendingResrv")
+                .add({borrowerID: this.rootData.uid,
+                      bookID: book.key,
+                      ownerID: book.ownerID})
+                .then(function() {
+                    //self.pendingRes[key] = true;
+                    self.$set(self.pendingRes,book.key,true);
+                    console.log("Reservation successfully updated!");
+                })
+                .catch(function(error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating reservation: ", error);
+                });
+
+        },
+        unreserveBook(){
+            let db = this.rootData.firebase.firestore();
+            let book = this.selectedBook;
+            let key = book.key;
+            self = this;
+            db.collection("pendingResrv")
+                .where("borrowerID","==",this.rootData.uid)
+                .where("bookID","==",key)
+                .where("ownerID","==",book.ownerID)
+                .get()
+     	        .then(function(querySnapshot) {
+	            querySnapshot.forEach(function(doc) {
+                        doc.ref.delete()
+                            .then(function() {
+                                self.pendingRes[key] = false;
+                                console.log("Cancelled reservation successfully!");
+                            })
+                            .catch(function(error) {
+                                console.error("Error cancelling reservation: ", error);
+                            });
+                    })
+                })
+        },
 	toggleAll (checked) {
 	    this.selected = checked ?
 		this.genre.slice().concat(this.availability.slice()) : []
@@ -161,7 +218,6 @@ export default {
 	    //console.log(i,this.filter);
 	    //console.log(i,this.selected);
 	}
-
     },
     computed: {
 	filteredBooks (){
@@ -194,26 +250,29 @@ export default {
 	    if(signedIn) {
 		// User is signed in.
 		if(!unsubscribe) unsubscribe =
-		    loadDb(this.rootData.firebase.firestore());
+		    loadDb(this);
 	    } else {
 		// User is signed out.
 		if (unsubscribe) {
 		    unsubscribe();
 		    unsubscribe = null
 		}
-		componentData.booksFB = [];
+		reactiveData.booksFB = [];
 	    }
 	    console.log(" watch signed in "+ signedIn);
 	}
     },
     created: function(){
 	console.log("Library created");
-	/*will only be called once when created, for subsequent
+
+        //Set non reactive Data
+        Object.assign(this, nonreactiveData);
+        /*will only be called once when created, for subsequent
          signins we use the watch*/
 
 	if (this.rootData.signedIn)
 	    unsubscribe =
-		    loadDb(this.rootData.firebase.firestore());
+	    loadDb(this);
     }
 
 } //export
@@ -228,8 +287,23 @@ export default {
 */
 
 
-function loadDb (db) {
-    componentData.loading = true;
+function loadDb (vm) {
+    let db = vm.rootData.firebase.firestore();
+    let uid = vm.rootData.uid;
+    reactiveData.loading = true;
+    db.collection("pendingResrv").where("borrowerID", "==", uid)
+     	.get()
+     	.then(function(querySnapshot) {
+	    querySnapshot.forEach(function(doc) {
+		let dt = doc.data();
+		//reactiveData.pendingRes[dt.bookID] = true;
+                vm.$set(vm.pendingRes,dt.bookID,true);
+            });
+     	})
+     	.catch(function(error) {
+            console.error("Error getting pending reserv: ", error);
+     	});
+
     return db.collection("books")
 	.onSnapshot(function(snapshot) {
             snapshot.docChanges.forEach(function(change) {
@@ -238,24 +312,24 @@ function loadDb (db) {
 		dt.key = key;
                 dt.createdDate = new Date(dt.createdTime).toLocaleDateString();
 		if (change.type === "added") {
-		    componentData.booksFB.push(dt);
+		    reactiveData.booksFB.push(dt);
                     console.log("New: ", key);
 		} else {
-		    let index = indexForKey (componentData.booksFB, key);
+		    let index = indexForKey (reactiveData.booksFB, key);
 		    if (change.type === "modified") {
 			/*Can't use indexing as Vue will not trigger*/
-			componentData.booksFB.splice(index,1,dt);
+			reactiveData.booksFB.splice(index,1,dt);
 			console.log("Modified : ", key);
 		    } else {
 			if (change.type === "removed") {
-			    componentData.booksFB.splice(index,1 );
+			    reactiveData.booksFB.splice(index,1 );
 			    console.log("Removed: ", key);
 			}
 		    }
 
 		}
             });
-	    componentData.loading = false;
+	    reactiveData.loading = false;
 	});
 }
 

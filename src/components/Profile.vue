@@ -94,12 +94,6 @@
 		    		     rows="6"
 		    		     max-rows="6">{{description}}</textarea>
 
-
-		    <router-link to="/book/1230974">more info</router-link>
-		    <br><small><strong>Added on: </strong> 11/04/14</small>
-		    <!-- <b-form-input size="sm" v-model="availableDate" type="date">11/04/17</b-form-input> -->
-		    <!-- <input  type="date">11/04/17</input> -->
-		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleEdit(index,false)">Cancel</b-button>
 		      <b-button  size="sm" @click.prevent="toggleEdit(index,true)" variant="primary">Save</b-button>
@@ -127,9 +121,6 @@
 		    		     max-rows="6">{{description}}</textarea>
 
 
-		    <router-link to="/book/1230974">more info</router-link>
-		    <br><small><strong>Added on: </strong> 11/04/14</small>
-		    <br><small><strong>Added by: </strong> johnb</small>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
 		      <b-button  size="sm" @click.prevent="addBook('add-end')" variant="primary">Add</b-button>
@@ -170,13 +161,17 @@ import Datepicker from 'vuejs-datepicker';
 
 var componentData = {
 
-      reservedBooks: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
+    reservedBooks: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
 		      { title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'}],
-      myBooks:[],
-      oldBookInfo:[],
-      newBook: {title: '', author: '', type: '' },
+    myBooks:[],
+    oldBookInfo:[],
+    newBook: {title: '',
+              author: '',
+              type: '' ,
+              ownerID: '',
+              ownerName: ''},
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
       time: new Date(),
@@ -332,8 +327,8 @@ export default {
 	    // Add to DB
 	    db.collection("books").add(this.newBook)
 		.then(function(docRef) {
-		  self.myBooks[self.myBooks.length-1].key = docRef.id;
-		  console.log("Document written with ID: ", docRef.id);
+		    self.myBooks[self.myBooks.length-1].key = docRef.id;
+		    console.log("Document written with ID: ", docRef.id);
 	      })
 	      .catch(function(error) {
 		  console.error("Error adding document: ", error);
@@ -396,7 +391,7 @@ function loadDb (db,uid) {
 	    componentData.loading = false;
      	})
      	.catch(function(error) {
-            console.log("Error getting documents: ", error);
+            console.error("Error getting documents: ", error);
      	});
 
 }
