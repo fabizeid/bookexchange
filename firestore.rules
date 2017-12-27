@@ -8,7 +8,7 @@ service cloud.firestore {
 	allow update, delete: if request.auth.uid == resource.data.ownerID;
     }
 
-    match /pendingResrv/{currentResrv} {
+    match /transaction/{currentTrans} {
         allow read, create: if request.auth != null;
         // Allow only owner of book or the requestor to edit or delete the
         // current waiting list

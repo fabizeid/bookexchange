@@ -64,9 +64,16 @@
 		  <strong class="text-nowrap">Available on:</strong> 11/04/17
 		</small>
 		<br>
-                <a v-if="pendingRes[book.key]" href="#" @click.prevent="showModal(book,'unreserve')" size="sm">
+                <a v-if="book.reserved">
+                  Reserved
+                </a>
+                <a v-else-if="transactionStatus[book.key] == 'pending'"
+                   href="#" @click.prevent="showModal(book,'unreserve')" size="sm">
 		  Pending
 		</a>
+                <a v-else-if="transactionStatus[book.key] == 'wait'">
+                  Wait ...
+                </a>
                 <a v-else href="#" @click.prevent="showModal(book,'reserve')" size="sm">
 		  Reserve
 		</a>
@@ -121,7 +128,8 @@ import truncate from 'vue-truncate-collapsed';
 let reactiveData = {
 
     booksFB: [],
-    pendingRes: {},
+    //status could be: none, pending, wait, reserved
+    transactionStatus: {},
     filter: null,
     selected: [],
     allSelected: false,
@@ -159,14 +167,17 @@ export default {
         reserveBook(){
             let db = this.rootData.firebase.firestore();
             let book = this.selectedBook;
+            let key = book.key;
             self = this;
-            db.collection("pendingResrv")
+            self.$set(self.transactionStatus,key,'wait');
+            db.collection("transaction")
                 .add({borrowerID: this.rootData.uid,
-                      bookID: book.key,
-                      ownerID: book.ownerID})
+                      bookID: key,
+                      ownerID: book.ownerID,
+                      status: 'pending'})
                 .then(function() {
-                    //self.pendingRes[key] = true;
-                    self.$set(self.pendingRes,book.key,true);
+                    self.transactionStatus[key] = 'pending';
+                    //self.$set(self.transactionStatus,book.key,'pending');
                     console.log("Reservation successfully updated!");
                 })
                 .catch(function(error) {
@@ -180,7 +191,8 @@ export default {
             let book = this.selectedBook;
             let key = book.key;
             self = this;
-            db.collection("pendingResrv")
+            self.transactionStatus[key] = 'wait';
+            db.collection("transaction")
                 .where("borrowerID","==",this.rootData.uid)
                 .where("bookID","==",key)
                 .where("ownerID","==",book.ownerID)
@@ -189,7 +201,7 @@ export default {
 	            querySnapshot.forEach(function(doc) {
                         doc.ref.delete()
                             .then(function() {
-                                self.pendingRes[key] = false;
+                                self.transactionStatus[key] = 'none';
                                 console.log("Cancelled reservation successfully!");
                             })
                             .catch(function(error) {
@@ -291,13 +303,13 @@ function loadDb (vm) {
     let db = vm.rootData.firebase.firestore();
     let uid = vm.rootData.uid;
     reactiveData.loading = true;
-    db.collection("pendingResrv").where("borrowerID", "==", uid)
+    db.collection("transaction").where("borrowerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
 	    querySnapshot.forEach(function(doc) {
 		let dt = doc.data();
-		//reactiveData.pendingRes[dt.bookID] = true;
-                vm.$set(vm.pendingRes,dt.bookID,true);
+		//reactiveData.transactionStatus[dt.bookID] = true;
+                vm.$set(vm.transactionStatus,dt.bookID,dt.status);
             });
      	})
      	.catch(function(error) {

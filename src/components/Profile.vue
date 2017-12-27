@@ -57,22 +57,30 @@
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
 	      <tr>
 		<td>
-		  <a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
-		  <br>
-		  by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a>
+                  <div>
+		    <a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
+                  </div>
+		  <div>
+		    by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a>
+                  </div>
+                  <div>
+                    <small ><strong class="text-nowrap">Borrowed by:</strong><a class="text-nowrap">John Murphy</a></small>                    
+                  </div>
 		</td>
 		<td class="text-right">
 		  <div>
-		    <small ><strong class="text-nowrap">Available on:</strong></small>
-		    <datepicker v-model="time" v-on:input="logme('datepicked')"
-				input-class="form-control form-control-sm datepickerInput"
-				calendar-class="datepickerCalendar"
-				class="d-inline-block align-middle"
-				></datepicker>
+		    <small ><strong class="text-nowrap">Available on:</strong>12/08/17</small>
+		    <!-- <datepicker v-model="time" v-on:input="logme('datepicked')" -->
+		    <!--     	input-class="form-control form-control-sm datepickerInput" -->
+		    <!--     	calendar-class="datepickerCalendar" -->
+		    <!--     	class="d-inline-block align-middle" -->
+		    <!--     	></datepicker> -->
+                    
 		  </div>
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
-		    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
+                    <a href="#" @click.prevent>Extend</a>
+                    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
 		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
 		      <icon name="trash"/></a>
@@ -171,7 +179,8 @@ var componentData = {
               author: '',
               type: '' ,
               ownerID: '',
-              ownerName: ''},
+              ownerName: '',
+              reserved: false},
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
       time: new Date(),

@@ -1,7 +1,6 @@
 <template>
   <b-button size="sm" v-on:click="toggleSignIn()">
-    <icon v-bind:name = "signedIn? 'sign-in': 'sign-out'" aria-hidden="true"></icon>
-    {{signInMessage}}
+    <icon v-bind:name = "signedIn? 'sign-in': 'sign-out'" aria-hidden="true"></icon><a class="align-middle">{{signInMessage}}</a>
   </b-button>
 </template>
 
