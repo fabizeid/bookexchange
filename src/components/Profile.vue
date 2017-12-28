@@ -62,18 +62,12 @@
 		    by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a>
                   </div>
                   <div>
-                    <small ><strong class="text-nowrap">Borrowed by:</strong><a class="text-nowrap">John Murphy</a></small>                    
+                    <small ><strong class="text-nowrap">Borrowed by:</strong><a class="text-nowrap">John Murphy</a></small>
                   </div>
 		</td>
 		<td class="text-right">
 		  <div>
 		    <small ><strong class="text-nowrap">Available on:</strong>12/08/17</small>
-		    <!-- <datepicker v-model="time" v-on:input="logme('datepicked')" -->
-		    <!--     	input-class="form-control form-control-sm datepickerInput" -->
-		    <!--     	calendar-class="datepickerCalendar" -->
-		    <!--     	class="d-inline-block align-middle" -->
-		    <!--     	></datepicker> -->
-                    
 		  </div>
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
@@ -154,7 +148,6 @@
             <datepicker v-model="selectedDuetime" inline bootstrapStyling/>
           </form>
         </b-modal>
-        
    </div>
   </div>
 </template>
@@ -218,9 +211,24 @@ export default {
 	    this.selectedBook = book;
             if(modalRef == 'reserveModal'){
                 //fill borrowers select options for current book
-                this.borrowers = {a: {value:'a', text: 'Fred Abey'},
-                                  b: {value:'b', text: 'John Murphy'}};
-                this.selectedBorrower = 'a';
+                let borrowReqArr = this.transactions[book.key];
+                let borrowers = this.borrowers;
+                let setReactive = this.$set;//vue set api
+                for(let i = 0; i < borrowReqArr.length; i++)
+                {
+                    let borrowerID = borrowReqArr[i].borrowerID;
+                    let borrowerName = borrowReqArr[i].borrowerName;
+                    if (borrowers.hasOwnProperty(borrowerID)){
+                        //already reactive
+                        borrowers[borrowerID] = {value: borrowerID,
+                                                 text: borrowerName};
+                    } else {
+                        setReactive(borrowers,borrowerID,{value: borrowerID,
+                                                          text: borrowerName});
+                    }
+                }
+                //first borrowers element
+                this.selectedBorrower = borrowReqArr[0].borrowerID;
             }
 	    this.$refs[modalRef].show()
 	},
@@ -350,22 +358,31 @@ export default {
         lendBook: function () {
             let book = this.selectedBook;
 	    let db = this.rootData.firebase.firestore();
-	    let key = book.key;
-            let bid = indexForKey (this.myBooks, key);
             let borrowerID = this.selectedBorrower;
             let borrowerName = this.borrowers[borrowerID].text;
-            let selectedDueDate = this.selectedDuetime.toLocaleDateString(); 
-            /*db.collection("books").doc(key).update({
-                borrowerID: borrowerID,
-                borrowerName: borrowerName,
-                dueDate: selectedDueDate 
-            }).then(function() {
+            let selectedDueDate = this.selectedDuetime.toLocaleDateString();
+            let borrowReqsForCurrentBook = this.transactions[book.key];
+            let transIdx =
+                indexForKey(borrowReqsForCurrentBook,borrowerID,'borrowerID');
+            let transKey = borrowReqsForCurrentBook[transIdx].transID;
+            let batch = db.batch();
+
+            batch.update(db.collection("books").doc(book.key),
+                         {
+                             borrowerID: borrowerID,
+                             borrowerName: borrowerName,
+                             dueDate: selectedDueDate
+                         });
+            batch.delete(db.collection("transaction").doc(transKey));
+            batch.commit().then(function() {
+                //remove trans from reactive variable
+	        borrowReqsForCurrentBook.splice(transIdx,1);
                 console.log("lending successfully updated!");
             }).catch(function(error) {
                 console.error("Error lending book: ", error);
-            });*/
+            });
 
-	}        
+	}
     },
     watch: {
 	'rootData.signedIn': function (signedIn) {
@@ -422,16 +439,17 @@ function loadDb (vm) {
     let db = vm.rootData.firebase.firestore();
     let uid = vm.rootData.uid;
     let transactions = vm.transactions;
+    let setReactive = vm.$set;//vue set api
     db.collection("transaction").where("ownerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
 	    querySnapshot.forEach(function(doc) {
 		let dt = doc.data();
-		let key = dt.bookID;
-		//
-                if(!transactions.hasOwnProperty(key))
-                    transactions[key]=[];
-                transactions[key].push(dt);
+		let bookKey = dt.bookID;
+                dt.transID = doc.id;
+                if(!transactions.hasOwnProperty(bookKey))
+                    setReactive(transactions,bookKey,[]);
+                transactions[bookKey].push(dt);
             });
      	})
      	.catch(function(error) {
@@ -461,9 +479,12 @@ function loadDb (vm) {
  * @param {string} key
  * @return {number}
  */
-function indexForKey (array, key) {
-  for (let i = 0; i < array.length; i++) {
-    if (array[i].key === key) {
+function indexForKey (array, key, keyname) {
+    if(typeof keyname === "undefined") {
+        keyname = 'key';
+    }
+    for (let i = 0; i < array.length; i++) {
+    if (array[i][keyname] === key) {
       return i
     }
   }

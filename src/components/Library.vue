@@ -169,6 +169,7 @@ export default {
             self.$set(self.transactionStatus,key,'wait');
             db.collection("transaction")
                 .add({borrowerID: this.rootData.uid,
+                      borrowerName: this.rootData.name,
                       bookID: key,
                       ownerID: book.ownerID,
                       status: 'pending'})
