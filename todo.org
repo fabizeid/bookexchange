@@ -29,4 +29,5 @@ Remaining todos:
 * Profile:
   - show books borrowed by others
   - highlight background of books past due
-
+  - Make all db updates realtime
+  - Hide/Unhide book from Library (eye icon)

@@ -61,10 +61,11 @@
 	      </td>
               <td class="text-right">
 		<small>
-		  <strong class="text-nowrap">Available on:</strong> 11/04/17
+		  <strong class="text-nowrap">Available:</strong>
+                  <a>{{book.dueDate?book.dueDate:"now"}}</a>
 		</small>
 		<br>
-                <a v-if="book.reserved">
+                <a v-if="book.borrowerID">
                   Reserved
                 </a>
                 <a v-else-if="transactionStatus[book.key] == 'pending'"

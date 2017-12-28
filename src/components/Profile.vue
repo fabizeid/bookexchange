@@ -61,17 +61,18 @@
 		  <div>
 		    by <a class="myinput" data-f-field="author" :data-f-index="index">{{book.author}}</a>
                   </div>
-                  <div>
-                    <small ><strong class="text-nowrap">Borrowed by:</strong><a class="text-nowrap">John Murphy</a></small>
+                  <div v-if="book.borrowerID">
+                    <small ><strong class="text-nowrap">Borrowed by: </strong><a class="text-nowrap">{{book.borrowerName}}</a></small>
                   </div>
 		</td>
 		<td class="text-right">
 		  <div>
-		    <small ><strong class="text-nowrap">Available on:</strong>12/08/17</small>
+		    <small ><strong class="text-nowrap">Available: </strong>{{book.dueDate?book.dueDate:"now"}}</small>
 		  </div>
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
-                    <a v-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'reserveModal')">Lend</a>
+                    <a v-if="book.borrowerID" href="#" @click.prevent= "showModal(book,'returnModal')">Return</a>
+                    <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'reserveModal')">Lend</a>
                     <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
 		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showModal(book,'deleteModal')">
@@ -139,6 +140,9 @@
   	<b-modal v-if="myBooks.length" ref="deleteModal" @ok="removeBook()">
   	  <a>Are you sure you want to delete:
             {{selectedBook.title}}</a>
+  	</b-modal>
+  	<b-modal ref="returnModal" @ok="returnBook()">
+  	  <a>Make "{{selectedBook.title}}" available for reservation?</a>
   	</b-modal>
 	<b-modal ref="reserveModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
           <form @submit.stop.prevent> <!-- ="handleSubmit" -->
@@ -375,14 +379,34 @@ export default {
                          });
             batch.delete(db.collection("transaction").doc(transKey));
             batch.commit().then(function() {
+                book.borrowerID = borrowerID;
+                book.borrowerName = borrowerName;
+                book.dueDate = selectedDueDate;
                 //remove trans from reactive variable
 	        borrowReqsForCurrentBook.splice(transIdx,1);
                 console.log("lending successfully updated!");
             }).catch(function(error) {
                 console.error("Error lending book: ", error);
             });
-
-	}
+	},
+        returnBook: function () {
+            let book = this.selectedBook;
+	    let db = this.rootData.firebase.firestore();
+            db.collection("books").doc(book.key)
+                .update({
+                    borrowerID: "",
+                    borrowerName: "",
+                    dueDate: ""
+                }).then(function() {
+                    //reset reactive variable
+                    book.borrowerID = "";
+                    book.borrowerName =  "",
+                    book.dueDate = "";
+                    console.log("returned successfully!");
+                }).catch(function(error) {
+                    console.error("Error returning book: ", error);
+                });
+        }
     },
     watch: {
 	'rootData.signedIn': function (signedIn) {
