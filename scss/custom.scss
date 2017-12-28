@@ -23,7 +23,7 @@ $custom-select-indicator: none;
     font-size: 120%;
     outline: none;
     color: #333333;
-    
+
 }
 
 .myinput:not([contenteditable]) {
@@ -70,6 +70,24 @@ a {
 .truncate > p > a:hover {
     text-decoration: underline !important;
 }
+
+.modal-body select {
+    background-color: white !important;
+}
+
+ .vdp-datepicker__calendar .cell {
+    height: 20px !important;
+    line-height: 20px !important;
+ }
+
+ /* Trick to make modal fit content, in this case the calendar*/
+ .modal {
+     text-align: center;
+ }
+ .modal-dialog {
+     display: inline-block;
+ }
+
 /* * { */
 /*     font-family: "Merriweather", serif; */
 /* } */
@@ -121,8 +139,8 @@ $theme-colors: map-merge($theme-colors,("dark": $darker));
 	background-color: $table-head-bg;
 	color: $table-head-color;
     }
-    
-    
+
+
 }
 
 body {

@@ -84,15 +84,14 @@
 	</table>
     </div>
 
-	<b-modal ref="reserveModal">
-	  <pre>
+	<b-modal ref="reserveModal" title="Lend 'The Book'">
+          <form @submit.stop.prevent="handleSubmit">
+            <label for="rsrvSelect" class="d-block text-left">Select borrower:</label>
+            <b-form-select id="rsrvSelect" v-model="selectedoption" :options="options" class="d-block mb-3"/>
+            <label class="d-block text-left">Select due date:</label>
+            <datepicker inline bootstrapStyling/>
 
-  Hello,
-  To reserve "{{booksFB[reserveId].title}}"
-  please contact: "{{booksFB[reserveId].author}}"
-
-	  </pre>
-	</b-modal>
+        </form>	</b-modal>
 
 
 	
@@ -100,6 +99,8 @@
 </template>
 
 <script>
+  import Datepicker from 'vuejs-datepicker';
+
   var componentData = {
 
       booksFB: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
@@ -142,12 +143,18 @@
       indeterminate: false,
       sortSelected: 'Default',
       sortOptions: ['Default','Title','Author'],
-      reserveId: 0
+      reserveId: 0,
+      options: [ { value: 'a', text: 'Fred Abey' },
+                 { value: 'b', text: 'John Murphy' }],
+      selectedoption: 'a'
   };
 
 
 export default {
     name: 'Landing',
+    components: {
+	Datepicker
+    },
     data () {
 	return componentData;
     },

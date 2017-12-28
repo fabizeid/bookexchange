@@ -19,9 +19,7 @@
 		<small>
 		  <strong class="text-nowrap">Return by:</strong> 11/04/17
 		</small>
-		<br><a href="#" @click.prevent="showModal(index)" class="text-right" size="sm">
-		  Extend
-		</a>
+		<br><a href="#" @click.prevent="showModal(book,'extendModal')" class="text-right" size="sm">Extend</a>
 	      </td>
             </tr>
 	      <tr>
@@ -40,12 +38,12 @@
 	</table>
    </div>
 
-	<b-modal ref="reserveModal">
+	<b-modal ref="extendModal">
 	  <pre>
 
   Hello,
-  To extend "{{reservedBooks[reserveId].title}}"
-  please contact: "{{reservedBooks[reserveId].author}}"
+  To extend "{{selectedBook.title}}"
+  please contact: "{{selectedBook.author}}"
 
 	  </pre>
 	</b-modal>
@@ -79,10 +77,10 @@
 		  </div>
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
-                    <a href="#" @click.prevent>Extend</a>
+                    <a v-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'reserveModal')">Lend</a>
                     <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
-		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showConfirmModal(index)">
+		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showModal(book,'deleteModal')">
 		      <icon name="trash"/></a>
 		  </div>
 		</td>
@@ -121,8 +119,8 @@
 	    <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'add-end'"  style="padding: .75rem;">
-		    <b-form-input type="text" v-model.trim="newBook.title" placeholder="Title"/>
-		    <b-form-input type="text" v-model.trim="newBook.author" placeholder="Author"/>
+		    <b-form-input type="text" v-model.trim="newBookTitle" placeholder="Title"/>
+		    <b-form-input type="text" v-model.trim="newBookAuthor" placeholder="Author"/>
 		    <textarea id="textarea1" class="form-control"
 		    		     placeholder="Enter something"
 		    		     rows="6"
@@ -144,16 +142,19 @@
 	  <a>Loading...</a>
 	</div>
 
-  	<b-modal v-if="myBooks.length" ref="confirmModal" @ok="removeBook(myBookId)">
-  	  <pre>
-
-   Are you sure you want to delete:
-   {{myBookId}}
-   <!-- The following statement was introducing bugs in emacs indentation -->
-  <!-- "{{(myBookId>myBooks.length-1)?'undef':myBooks[myBookId].title}}" -->
-
-  	  </pre>
+  	<b-modal v-if="myBooks.length" ref="deleteModal" @ok="removeBook()">
+  	  <a>Are you sure you want to delete:
+            {{selectedBook.title}}</a>
   	</b-modal>
+	<b-modal ref="reserveModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
+          <form @submit.stop.prevent> <!-- ="handleSubmit" -->
+            <label for="rsrvSelect" class="d-block text-left">Select borrower:</label>
+            <b-form-select id="rsrvSelect" v-model="selectedBorrower" :options="borrowers" class="d-block mb-3"/>
+            <label class="d-block text-left">Select due date:</label>
+            <datepicker v-model="selectedDuetime" inline bootstrapStyling/>
+          </form>
+        </b-modal>
+        
    </div>
   </div>
 </template>
@@ -173,17 +174,8 @@ var componentData = {
 		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
 		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
 		      { title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'}],
-    myBooks:[],
-    oldBookInfo:[],
-    newBook: {title: '',
-              author: '',
-              type: '' ,
-              ownerID: '',
-              ownerName: '',
-              reserved: false},
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
-      time: new Date(),
       fields: [
 	  {
 	      key: 'title',
@@ -204,18 +196,7 @@ var componentData = {
 	      label: 'Status',
 	      sortable: true,
 	  }
-      ],
-
-      genre: ['Biography/Memoir', 'Art/Photograhy',
-	      'History', 'Romance', 'Fiction'],
-      selected: [],
-      allSelected: false,
-      indeterminate: false,
-      sortSelected: 'Default',
-      sortOptions: ['Default','Title','Author'],
-      reserveId: 0,
-      myBookId: 0,
-      loading: false
+      ]
   };
 
 
@@ -225,6 +206,7 @@ export default {
 	Datepicker
     },
     data () {
+        reset();
 	componentData.rootData = this.$root.$data;
 	return componentData;
     },
@@ -232,13 +214,15 @@ export default {
 	logme(m) {
 	    console.log(m);
 	},
-	showConfirmModal(mid){
-	    this.myBookId = mid;
-	    this.$refs.confirmModal.show()
-	    },
-	showModal(mid){
-	    this.reserveId = mid;
-	    this.$refs.reserveModal.show()
+        showModal(book,modalRef){
+	    this.selectedBook = book;
+            if(modalRef == 'reserveModal'){
+                //fill borrowers select options for current book
+                this.borrowers = {a: {value:'a', text: 'Fred Abey'},
+                                  b: {value:'b', text: 'John Murphy'}};
+                this.selectedBorrower = 'a';
+            }
+	    this.$refs[modalRef].show()
 	},
 	makeEdit(mid,id){
 	    let el = document.getElementById(mid); //current element
@@ -326,15 +310,17 @@ export default {
 	addBook(mid){
 	    //Add new book
 	    let db = this.rootData.firebase.firestore();
-	    this.newBook.ownerID = this.rootData.uid;
-            this.newBook.ownerName = this.rootData.name;
+            let newBook = createNewBook();
+	    newBook.ownerID = this.rootData.uid;
+            newBook.ownerName = this.rootData.name;
+            newBook.title = this.newBookTitle;
+            newBook.author = this.newBookAuthor;
 	    // Add to reactive array
-	    this.myBooks.push(Object.assign({},this.newBook));
+	    this.myBooks.push(newBook);
 	    this.toggleCollapse(mid);
 	    let self = this;
-
 	    // Add to DB
-	    db.collection("books").add(this.newBook)
+	    db.collection("books").add(newBook)
 		.then(function(docRef) {
 		    self.myBooks[self.myBooks.length-1].key = docRef.id;
 		    console.log("Document written with ID: ", docRef.id);
@@ -342,13 +328,12 @@ export default {
 	      .catch(function(error) {
 		  console.error("Error adding document: ", error);
 	      });
-	    this.newBook.title = '';
-	    this.newBook.author= '';
 	},
-	removeBook: function (bid) {
-
+	removeBook: function () {
+            let book = this.selectedBook;
 	    let db = this.rootData.firebase.firestore();
-	    let key = this.myBooks[bid].key;
+	    let key = book.key;
+            let bid = indexForKey (this.myBooks, key);
 	    //remove from reactive variable
 	    this.myBooks.splice(bid,1);
 	    //remove from DB
@@ -357,20 +342,41 @@ export default {
 	    }).catch(function(error) {
 		console.error("Error removing document: ", error);
 	    });
+	},
+        hasBorrowRequest: function(book){
+            return this.transactions.hasOwnProperty(book.key) &&
+                this.transactions[book.key].length > 0;
+        },
+        lendBook: function () {
+            let book = this.selectedBook;
+	    let db = this.rootData.firebase.firestore();
+	    let key = book.key;
+            let bid = indexForKey (this.myBooks, key);
+            let borrowerID = this.selectedBorrower;
+            let borrowerName = this.borrowers[borrowerID].text;
+            let selectedDueDate = this.selectedDuetime.toLocaleDateString(); 
+            /*db.collection("books").doc(key).update({
+                borrowerID: borrowerID,
+                borrowerName: borrowerName,
+                dueDate: selectedDueDate 
+            }).then(function() {
+                console.log("lending successfully updated!");
+            }).catch(function(error) {
+                console.error("Error lending book: ", error);
+            });*/
 
-	}
-
+	}        
     },
     watch: {
 	'rootData.signedIn': function (signedIn) {
 	    if(signedIn) {
 		// User is signed in.
-		loadDb(this.rootData.firebase.firestore(),
-		       this.rootData.uid);
+                reset();
+		loadDb(this);
 	    } else {
 		if (this.$router.currentRoute.name == 'profile')
 		    this.$router.go(-1); //go back to previous page
-		componentData.myBooks = [];
+                reset();
 	    }
 	    console.log(" profile signed in "+ signedIn);
 	}
@@ -381,13 +387,56 @@ export default {
 	/*will only be called once when created, for subsequent
          signins we use the watch*/
 	if (this.rootData.signedIn)
-	    loadDb(this.rootData.firebase.firestore(),
-		   this.rootData.uid);
+	    loadDb(this);
     }
 }
 
-function loadDb (db,uid) {
+function createNewBook(){
+    return {title: '',
+            author: '',
+            type: '' ,
+            ownerID: '',
+            ownerName: '',
+            borrowerID:'',
+            borrowerName:'',
+            dueDate: '',
+            reserved: false};
+}
+
+function reset(){
+    Object.assign(componentData,
+        {myBooks:[],
+         oldBookInfo:[],
+         newBookTitle: '',
+         newBookAuthor: '',
+         transactions: {},
+         loading: false,
+         selectedBook: {},
+         borrowers: {},
+         selectedBorrower: '',
+         selectedDuetime: new Date()});
+}
+
+function loadDb (vm) {
     componentData.loading = true;
+    let db = vm.rootData.firebase.firestore();
+    let uid = vm.rootData.uid;
+    let transactions = vm.transactions;
+    db.collection("transaction").where("ownerID", "==", uid)
+     	.get()
+     	.then(function(querySnapshot) {
+	    querySnapshot.forEach(function(doc) {
+		let dt = doc.data();
+		let key = dt.bookID;
+		//
+                if(!transactions.hasOwnProperty(key))
+                    transactions[key]=[];
+                transactions[key].push(dt);
+            });
+     	})
+     	.catch(function(error) {
+            console.error("Error getting documents: ", error);
+     	});
     db.collection("books").where("ownerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
@@ -404,6 +453,22 @@ function loadDb (db,uid) {
      	});
 
 }
+
+/**
+ * Find the index for an object with given key.
+ *
+ * @param {array} array
+ * @param {string} key
+ * @return {number}
+ */
+function indexForKey (array, key) {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].key === key) {
+      return i
+    }
+  }
+}
+
 
 </script>
 

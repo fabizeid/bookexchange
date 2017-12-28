@@ -68,13 +68,13 @@
                   Reserved
                 </a>
                 <a v-else-if="transactionStatus[book.key] == 'pending'"
-                   href="#" @click.prevent="showModal(book,'unreserve')" size="sm">
+                   href="#" @click.prevent="showModal(book,'unreserveModal')" size="sm">
 		  Pending
 		</a>
                 <a v-else-if="transactionStatus[book.key] == 'wait'">
                   Wait ...
                 </a>
-                <a v-else href="#" @click.prevent="showModal(book,'reserve')" size="sm">
+                <a v-else href="#" @click.prevent="showModal(book,'reserveModal')" size="sm">
 		  Reserve
 		</a>
 	      </td>
@@ -159,10 +159,7 @@ export default {
 	},
 	showModal(book,type){
 	    this.selectedBook = book;
-            if (type == "reserve")
-	        this.$refs.reserveModal.show()
-            else if (type == "unreserve")
-                this.$refs.unreserveModal.show()
+	    this.$refs[type].show()
 	},
         reserveBook(){
             let db = this.rootData.firebase.firestore();
@@ -308,7 +305,9 @@ function loadDb (vm) {
      	.then(function(querySnapshot) {
 	    querySnapshot.forEach(function(doc) {
 		let dt = doc.data();
-		//reactiveData.transactionStatus[dt.bookID] = true;
+                //it shouldn't happen but in case there several
+                //transaction with same bookID and borrowID only
+                //one is used(last one overrides the rest)
                 vm.$set(vm.transactionStatus,dt.bookID,dt.status);
             });
      	})
