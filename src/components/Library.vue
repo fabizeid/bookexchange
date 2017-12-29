@@ -44,7 +44,7 @@
 	  </b-col>
 	  <b-col class="py-2 text-nowrap text-right">
 	  <a>Sort by:</a>
-	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: 5rem;" v-model="sortSelected" :options="sortOptions">
+	  <b-form-select id="selectbg" class="p-0" style="height: auto; width: 7rem;" v-model="sortSelected" :options="sortOptions">
 	  </b-form-select>
 	  </b-col>
 	</b-row>
@@ -145,7 +145,7 @@ let nonreactiveData = {
     genre: ['Biography/Memoir', 'Art/Photograhy',
 	      'History', 'Romance', 'Fiction'],
     availability: ['Available','Reserved'],
-    sortOptions: ['Default','Title','Author']
+    sortOptions: ['Default','Title','Author','Date Added']
     }
 let unsubscribe = null;
 export default {
@@ -256,8 +256,15 @@ export default {
 	    let filteredBooks = self.booksFB.filter(self.filterFunc);
             if (self.sortSelected != 'Default') {
 		console.log(self.sortSelected);
-		filteredBooks = orderBy(filteredBooks,[user => user[self.sortSelected.toLowerCase()].toLowerCase()]);
-
+                if(self.sortSelected == "Date Added"){
+                    filteredBooks =
+                            orderBy(filteredBooks,
+                                    [book => book.createdTime],['desc']);
+                } else {
+		        filteredBooks =
+                            orderBy(filteredBooks,
+                                    [book => book[self.sortSelected.toLowerCase()].toLowerCase()]);
+                    }
 	    }
 	    return filteredBooks;
 	}
