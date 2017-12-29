@@ -25,7 +25,7 @@
 	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
 	      <b-form-checkbox-group id="availability"
 	  			   stacked
-	  			   v-model="selected"
+	  			   v-model="selectedAvail"
 	  			   name="availability"
 	  			   :options="availability"
 	  			   class="ml-3"
@@ -34,7 +34,7 @@
 	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
 	      <b-form-checkbox-group id="genre"
 	  			   stacked
-	  			   v-model="selected"
+	  			   v-model="selectedType"
 	  			   name="genre"
 	  			   :options="genre"
 	  			   class="ml-3"
@@ -132,7 +132,8 @@ let reactiveData = {
     //status could be: none, pending, wait, reserved
     transactionStatus: {},
     filter: null,
-    selected: [],
+    selectedAvail: [],
+    selectedType: [],
     allSelected: false,
     indeterminate: false,
     sortSelected: 'Default',
@@ -210,25 +211,43 @@ export default {
                 })
         },
 	toggleAll (checked) {
-	    this.selected = checked ?
-		this.genre.slice().concat(this.availability.slice()) : []
+	    this.selectedType = checked ?
+		this.genre.slice() : [];
+	    this.selectedAvail = checked ?
+		this.availability.slice() : [];
 	},
 	filterFunc (item){
 	    let test = true;
 	    if(this.filter) {
 		let regex = new RegExp('.*' + this.filter + '.*', 'ig');
-		let itemSearchStr=[item["author"],item["title"]].join(' ');
+		let itemSearchStr=item.author + " " + item.title;
 		test = regex.test(itemSearchStr);
 		regex.lastIndex = 0;
-		}
-	    if(this.selected.length) {
-		test = test & (this.selected.indexOf(item["type"]) !== -1);
+	    }
+	    if(this.selectedType.length) {
+ 		test = test &&
+                    (this.selectedType.indexOf(item.type) !== -1);
+	    }
+	    if(this.selectedAvail.length) {
+                let availability = (item.borrowerID?"Reserved":"Available");
+		test = test &&
+                    (this.selectedAvail.indexOf(availability) !== -1);
 	    }
 	    return test;
-	    //debugger;
-	    //console.log(i,this.filter);
-	    //console.log(i,this.selected);
-	}
+        },
+        setSelectionFlags(totalNumSelected){
+            if (totalNumSelected === 0) {
+		this.indeterminate = false
+		this.allSelected = false
+	    } else if (totalNumSelected === (this.genre.length +
+                                             this.availability.length)) {
+		this.indeterminate = false
+		this.allSelected = true
+	    } else {
+		this.indeterminate = true
+		this.allSelected = false
+	    }
+        }
     },
     computed: {
 	filteredBooks (){
@@ -244,18 +263,16 @@ export default {
 	}
     },
     watch: {
-	selected (newVal, oldVal) {
+	selectedAvail (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
-	    if (newVal.length === 0) {
-		this.indeterminate = false
-		this.allSelected = false
-	    } else if (newVal.length === this.genre.length) {
-		this.indeterminate = false
-		this.allSelected = true
-	    } else {
-		this.indeterminate = true
-		this.allSelected = false
-	    }
+            let totalNumSelected = newVal.length + this.selectedType.length; 
+            this.setSelectionFlags(totalNumSelected);
+        },
+        
+        selectedType (newVal, oldVal) {
+	    // Handle changes in individual flavour checkboxes
+            let totalNumSelected = newVal.length + this.selectedAvail.length;
+            this.setSelectionFlags(totalNumSelected);
 	},
 	'rootData.signedIn': function (signedIn) {
 	    if(signedIn) {

@@ -1,33 +1,33 @@
 
 Remaining todos:
 
-* Home:
+Home:
+Library:
+* click reserve: open modal showing email address of owner
+** click ok:
+*** close modal
+*** change reserve to unreserve
+    tooltip:  Cancel pending reservation
+*** new entry in Profile -> pending reservations table
+*** book owner gets notification: reservation request
+*** book owner has current user added to list of possible
+* click unreserve: open modal asking if you are sure
+** click ok:
+*** close modal
+*** change unreserve to reserve
+*** book owner gets notification: reservation cancelled
+*** book owner has current user removed from list of possible
+* click extend reservation:
+* Change search,filtering,sorting ui to look like logs ui of firebase function
+* Book state: Available, reserved
+* Button: reserve, unreserve(pending), disabled (when reserved)
+** create pendingreservation table with:
+*** bookid, ownerid, borrowerid
+*** in Lib query by borrowerid and fill in booksFB
 
-* Library:
-  - click reserve: open modal showing email address of owner
-    - click ok:
-      - close modal
-      - change reserve to unreserve
-        - tooltip:  Cancel pending reservation
-      - new entry in Profile -> pending reservations table
-      - book owner gets notification: reservation request
-      - book owner has current user added to list of possible
-  - click unreserve: open modal asking if you are sure
-    - click ok:
-      - close modal
-      - change unreserve to reserve
-      - book owner gets notification: reservation cancelled
-      - book owner has current user removed from list of possible
-  - click extend reservation:
-  - Change search,filtering,sorting ui to look like logs ui of firebase function
-  - Book state: Available, reserved
-  - Button: reserve, unreserve(pending), disabled (when reserved)
-    - create pendingreservation table with:
-      - bookid, ownerid, borrowerid
-      - in Lib query by borrowerid and fill in booksFB
-
-* Profile:
-  - show books borrowed by others
-  - highlight background of books past due
-  - Make all db updates realtime
-  - Hide/Unhide book from Library (eye icon)
+* sort by date added
+Profile:
+** show books borrowed by others
+** highlight background of books past due
+** DONE Make all db updates realtime
+** Hide/Unhide book from Library (eye icon)
