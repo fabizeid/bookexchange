@@ -17,7 +17,7 @@
 	      </td>
               <td class="text-right">
 		<small>
-		  <strong class="text-nowrap">Return by:</strong> 11/04/17
+		  <strong class="text-nowrap">Due: </strong>{{book.dueDate}}
 		</small>
 		<br><a href="#" @click.prevent="showModal(book,'extendModal')" class="text-right" size="sm">Extend</a>
 	      </td>
@@ -28,8 +28,8 @@
 
 		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
 		    <router-link to="/book/1230974">more info</router-link>
-		    <br><small><strong>Added on: </strong> 11/04/14</small>
-		    <br><small><strong>Added by: </strong> johnb</small>
+		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
+		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </b-collapse>
 		</td>
 	      </tr>
@@ -165,38 +165,15 @@ import 'vue-awesome/icons/spinner'
 // https://github.com/charliekassel/vuejs-datepicker
 import Datepicker from 'vuejs-datepicker';
 
-var componentData = {
+let reactiveData = {};//will be filled by reset
+let nonreactiveData = {
 
-    reservedBooks: [{ title: 'The box', author: 'John', type: 'Fiction',status: 'checked out'},
-		{ title: 'Hello'  , author: 'Jane', type: 'Fiction',status: 'checked out'},
-		{ title: 'The box of shiva fsdf fsdf fdsf ', author: 'Paul', type: 'Fiction',status: 'checked out'},
-		      { title: 'The box', author: 'Kate', type: 'Fiction',status: 'checked out'}],
+
       description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
       availableDate:"2017-11-07",
-      fields: [
-	  {
-	      key: 'title',
-	      label: 'Title',
-	  },
-	  {
-	      key: 'author',
-	      label: 'Author',
-	      sortable: true,
-	  },
-	  {
-	      key: 'type',
-	      label: 'Type',
-	      sortable: true,
-	  },
-	  {
-	      key: 'status',
-	      label: 'Status',
-	      sortable: true,
-	  }
-      ]
   };
 
-
+let unsubscribe = null;
 export default {
     name: 'Profile',
     components: {
@@ -204,8 +181,8 @@ export default {
     },
     data () {
         reset();
-	componentData.rootData = this.$root.$data;
-	return componentData;
+	reactiveData.rootData = this.$root.$data;
+	return reactiveData;
     },
     methods: {
 	logme(m) {
@@ -413,8 +390,14 @@ export default {
 	    if(signedIn) {
 		// User is signed in.
                 reset();
-		loadDb(this);
+                if(!unsubscribe) unsubscribe =
+		    loadDb(this);
 	    } else {
+                // User is signed out.
+		if (unsubscribe) {
+		    unsubscribe();
+		    unsubscribe = null
+		}
 		if (this.$router.currentRoute.name == 'profile')
 		    this.$router.go(-1); //go back to previous page
                 reset();
@@ -425,10 +408,13 @@ export default {
     },
     created: function(){
 	console.log("Profile created");
+        //Set non reactive Data
+        Object.assign(this, nonreactiveData);
+
 	/*will only be called once when created, for subsequent
          signins we use the watch*/
 	if (this.rootData.signedIn)
-	    loadDb(this);
+	    unsubscribe = loadDb(this);
     }
 }
 
@@ -445,8 +431,9 @@ function createNewBook(){
 }
 
 function reset(){
-    Object.assign(componentData,
-        {myBooks:[],
+    Object.assign(reactiveData,
+    {    reservedBooks: [],
+         myBooks:[],
          oldBookInfo:[],
          newBookTitle: '',
          newBookAuthor: '',
@@ -459,11 +446,37 @@ function reset(){
 }
 
 function loadDb (vm) {
-    componentData.loading = true;
+    reactiveData.loading = true;
     let db = vm.rootData.firebase.firestore();
     let uid = vm.rootData.uid;
     let transactions = vm.transactions;
     let setReactive = vm.$set;//vue set api
+    let unsubscribeBorrowed = db.collection("books").where("borrowerID", "==", uid)
+	.onSnapshot(function(snapshot) {
+            snapshot.docChanges.forEach(function(change) {
+		let dt = change.doc.data();
+		let key = change.doc.id;
+                dt.key = key;
+                dt.createdDate = new Date(dt.createdTime).toLocaleDateString();
+		if (change.type === "added") {
+		    reactiveData.reservedBooks.push(dt);
+                    console.log("New: ", key);
+		} else {
+		    let index = indexForKey (reactiveData.reservedBooks, key);
+		    if (change.type === "modified") {
+			/*Can't use indexing as Vue will not trigger*/
+			reactiveData.reservedBooks.splice(index,1,dt);
+			console.log("Modified : ", key);
+		    } else {
+			if (change.type === "removed") {
+			    reactiveData.reservedBooks.splice(index,1 );
+			    console.log("Removed: ", key);
+			}
+		    }
+
+		}
+            });
+        });
     db.collection("transaction").where("ownerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
@@ -486,14 +499,14 @@ function loadDb (vm) {
 		let dt = doc.data();
 		let key = doc.id;
 		dt.key = key;
-		componentData.myBooks.push(dt);
+		reactiveData.myBooks.push(dt);
             });
-	    componentData.loading = false;
+	    reactiveData.loading = false;
      	})
      	.catch(function(error) {
             console.error("Error getting documents: ", error);
      	});
-
+    return unsubscribeBorrowed;
 }
 
 /**

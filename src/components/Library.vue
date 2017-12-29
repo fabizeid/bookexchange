@@ -282,8 +282,7 @@ export default {
          signins we use the watch*/
 
 	if (this.rootData.signedIn)
-	    unsubscribe =
-	    loadDb(this);
+	    unsubscribe = loadDb(this);
     }
 
 } //export
