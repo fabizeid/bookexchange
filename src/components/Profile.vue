@@ -395,7 +395,7 @@ export default {
 	    } else {
                 // User is signed out.
 		if (unsubscribe) {
-		    unsubscribe();
+		    unsubscribe[0]();unsubscribe[1]();
 		    unsubscribe = null
 		}
 		if (this.$router.currentRoute.name == 'profile')
@@ -477,21 +477,32 @@ function loadDb (vm) {
 		}
             });
         });
-    db.collection("transaction").where("ownerID", "==", uid)
-     	.get()
-     	.then(function(querySnapshot) {
-	    querySnapshot.forEach(function(doc) {
-		let dt = doc.data();
-		let bookKey = dt.bookID;
-                dt.transID = doc.id;
-                if(!transactions.hasOwnProperty(bookKey))
-                    setReactive(transactions,bookKey,[]);
-                transactions[bookKey].push(dt);
+    let unsubscribeTransaction = db.collection("transaction").where("ownerID", "==", uid)
+	.onSnapshot(function(snapshot) {
+            snapshot.docChanges.forEach(function(change) {
+		let dt = change.doc.data();
+                let bookKey = dt.bookID;
+		if (change.type === "added") {
+                    dt.transID = change.doc.id;
+                    if(!transactions.hasOwnProperty(bookKey))
+                        setReactive(transactions,bookKey,[]);
+                    transactions[bookKey].push(dt);
+                    console.log("New trans: ", change.doc.id);
+		} else {
+		    if (change.type === "modified") {
+                        transactions[bookKey].push(dt);
+			console.log("Modified : ", change.doc.id);
+		    } else {
+			if (change.type === "removed") {
+                            transactions[bookKey] = [];
+			    console.log("Removed: ", change.doc.id);
+			}
+		    }
+		}
             });
-     	})
-     	.catch(function(error) {
-            console.error("Error getting documents: ", error);
-     	});
+
+	});
+
     db.collection("books").where("ownerID", "==", uid)
      	.get()
      	.then(function(querySnapshot) {
@@ -506,7 +517,7 @@ function loadDb (vm) {
      	.catch(function(error) {
             console.error("Error getting documents: ", error);
      	});
-    return unsubscribeBorrowed;
+    return [unsubscribeBorrowed,unsubscribeTransaction];
 }
 
 /**

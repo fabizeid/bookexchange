@@ -175,7 +175,7 @@ export default {
                       ownerID: book.ownerID,
                       status: 'pending'})
                 .then(function() {
-                    self.transactionStatus[key] = 'pending';
+                    //self.transactionStatus[key] = 'pending';
                     //self.$set(self.transactionStatus,book.key,'pending');
                     console.log("Reservation successfully updated!");
                 })
@@ -200,7 +200,7 @@ export default {
 	            querySnapshot.forEach(function(doc) {
                         doc.ref.delete()
                             .then(function() {
-                                self.transactionStatus[key] = 'none';
+                               // self.transactionStatus[key] = 'none';
                                 console.log("Cancelled reservation successfully!");
                             })
                             .catch(function(error) {
@@ -265,7 +265,7 @@ export default {
 	    } else {
 		// User is signed out.
 		if (unsubscribe) {
-		    unsubscribe();
+		    unsubscribe[0]();unsubscribe[1]();
 		    unsubscribe = null
 		}
 		reactiveData.booksFB = [];
@@ -300,23 +300,39 @@ export default {
 function loadDb (vm) {
     let db = vm.rootData.firebase.firestore();
     let uid = vm.rootData.uid;
+    let setReactive = vm.$set;//vue set api
     reactiveData.loading = true;
-    db.collection("transaction").where("borrowerID", "==", uid)
-     	.get()
-     	.then(function(querySnapshot) {
-	    querySnapshot.forEach(function(doc) {
-		let dt = doc.data();
-                //it shouldn't happen but in case there several
-                //transaction with same bookID and borrowID only
-                //one is used(last one overrides the rest)
-                vm.$set(vm.transactionStatus,dt.bookID,dt.status);
-            });
-     	})
-     	.catch(function(error) {
-            console.error("Error getting pending reserv: ", error);
-     	});
+    let unscubscribeTransaction = db.collection("transaction").where("borrowerID", "==", uid)
+	.onSnapshot(function(snapshot) {
+            snapshot.docChanges.forEach(function(change) {
+		let dt = change.doc.data();
+		if (change.type === "added") {
+		    //it shouldn't happen but in case there several
+                    //transaction with same bookID and borrowID only
+                    //one is used(last one overrides the rest)
+                    
+                    //we are using set here since since we are adding new
+                    //properties and we want them to be reactive
+                    setReactive(reactiveData.transactionStatus,dt.bookID,dt.status);
+                    console.log("New trans: ", change.doc.id);
+		} else {
+		    if (change.type === "modified") {
+                        reactiveData.transactionStatus[dt.bookID] = dt.status
+			console.log("Modified : ", change.doc.id);
+		    } else {
+			if (change.type === "removed") {
+                            reactiveData.transactionStatus[dt.bookID] = 'none';
+                            //deleting is non reactive
+                            //delete reactiveData.transactionStatus[dt.bookID];
+			    console.log("Removed: ", change.doc.id);
+			}
+		    }
 
-    return db.collection("books")
+		}
+            });
+
+	});
+    let unscubscribeBooks =  db.collection("books")
 	.onSnapshot(function(snapshot) {
             snapshot.docChanges.forEach(function(change) {
 		let dt = change.doc.data();
@@ -343,6 +359,7 @@ function loadDb (vm) {
             });
 	    reactiveData.loading = false;
 	});
+    return [unscubscribeTransaction, unscubscribeBooks];
 }
 
 /**
