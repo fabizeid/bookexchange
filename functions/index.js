@@ -65,6 +65,10 @@ exports.deleteUser = functions.auth.user().onDelete(event => {
 });
 
 //createBook({title: 'foo@'}, {params: {bookId: 'aaa'}})
+/*Could also do this from client:
+var updateTimestamp = docRef.update({
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+});*/
 exports.createBook = functions.firestore
   .document('books/{bookId}')
     .onCreate(event => {

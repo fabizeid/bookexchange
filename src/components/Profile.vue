@@ -25,9 +25,8 @@
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'titleProf-'+index" style="padding: .75rem;">
-
-		    <p>Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway</p>
-		    <router-link to="/book/1230974">more info</router-link>
+		    <p>{{book.descr}}</p>
+                    <a :href="book.link">more info</a>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </b-collapse>
@@ -84,16 +83,11 @@
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'add-'+index" @show="makeEdit('add-'+index,index)"
 			      v-on:hidden="removeEdit('add-'+index,index)"  style="padding: .75rem;">
-
-		    <!-- <b-form-textarea id="textarea1" -->
-		    <!-- 		     v-model="description" -->
-		    <!-- 		     placeholder="Enter something" -->
-		    <!-- 		     rows="6" -->
-		    <!-- 		     max-rows="6"></b-form-textarea> -->
-		    <textarea id="textarea1" class="form-control"
-		    		     placeholder="Enter something"
-		    		     rows="6"
-		    		     max-rows="6">{{description}}</textarea>
+                    <b-form-textarea v-model="book.descr"
+		    		     placeholder="Enter book description"
+		    		     :rows="6"
+		    		     :max-rows="6">{{book.descr}}</b-form-textarea>
+		    <b-form-input type="url" v-model.trim="book.link" placeholder="Optional URL"/>
 
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleEdit(index,false)">Cancel</b-button>
@@ -116,11 +110,11 @@
 		  <b-collapse :id="'add-end'"  style="padding: .75rem;">
 		    <b-form-input type="text" v-model.trim="newBookTitle" placeholder="Title"/>
 		    <b-form-input type="text" v-model.trim="newBookAuthor" placeholder="Author"/>
-		    <textarea id="textarea1" class="form-control"
-		    		     placeholder="Enter something"
-		    		     rows="6"
-		    		     max-rows="6">{{description}}</textarea>
-
+		    <b-form-textarea v-model="newBookDescr"
+		    		     placeholder="Enter book description"
+		    		     :rows="6"
+		    		     :max-rows="6">{{newBookDescr}}</b-form-textarea>
+		    <b-form-input type="url" v-model.trim="newBookURL" placeholder="Optional URL"/>
 
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
@@ -252,7 +246,9 @@ export default {
                let self = this;
                db.collection("books").doc(key).update({
                    title: self.myBooks[id].title,
-                   author: self.myBooks[id].author
+                   author: self.myBooks[id].author,
+                   descr: self.myBooks[id].descr,
+                   link: self.myBooks[id].link
                 }).then(function() {
                   console.log("Document successfully updated!");
                  })
@@ -282,7 +278,8 @@ export default {
 	    //to.title = from.title ;
 	    //to.author = from.author ;
 	    to.type = from.type ;
-
+            to.descr = from.descr;
+            to.link = from.link;
 	},
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
@@ -304,6 +301,8 @@ export default {
             newBook.ownerName = this.rootData.name;
             newBook.title = this.newBookTitle;
             newBook.author = this.newBookAuthor;
+            newBook.descr = this.newBookDescr;
+            newBook.link = this.newBookURL;
 	    // Add to reactive array
 	    this.myBooks.push(newBook);
 	    this.toggleCollapse(mid);
@@ -422,6 +421,8 @@ function createNewBook(){
     return {title: '',
             author: '',
             type: '' ,
+            descr: '',
+            link: '',
             ownerID: '',
             ownerName: '',
             borrowerID:'',
@@ -437,6 +438,9 @@ function reset(){
          oldBookInfo:[],
          newBookTitle: '',
          newBookAuthor: '',
+         newBookDescr: '',
+         newBookURL: '',
+         newBooktype: '',         
          transactions: {},
          loading: false,
          selectedBook: {},

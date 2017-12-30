@@ -6,28 +6,31 @@ Library:
 * click reserve: open modal showing email address of owner
 ** click ok:
 *** close modal
-*** change reserve to unreserve
+*** DONE change reserve to unreserve
     tooltip:  Cancel pending reservation
 *** new entry in Profile -> pending reservations table
 *** book owner gets notification: reservation request
-*** book owner has current user added to list of possible
-* click unreserve: open modal asking if you are sure
+*** DONE book owner has current user added to list of possible
+* DONE click unreserve: open modal asking if you are sure
 ** click ok:
-*** close modal
-*** change unreserve to reserve
+*** DONE close modal
+*** DONE change unreserve to reserve
 *** book owner gets notification: reservation cancelled
-*** book owner has current user removed from list of possible
+*** DONE book owner has current user removed from list of possible
 * click extend reservation:
 * Change search,filtering,sorting ui to look like logs ui of firebase function
-* Book state: Available, reserved
-* Button: reserve, unreserve(pending), disabled (when reserved)
-** create pendingreservation table with:
-*** bookid, ownerid, borrowerid
-*** in Lib query by borrowerid and fill in booksFB
+* DONE Book state: Available, reserved
+* DONE Button: reserve, unreserve(pending), disabled (when reserved)
+** DONE create pendingreservation table with:
+*** DONE bookid, ownerid, borrowerid
+*** DONE in Lib query by borrowerid and fill in booksFB
 
-* sort by date added
-Profile:
+* DONE sort by date added
+* Profile:
 ** show books borrowed by others
 ** highlight background of books past due
 ** DONE Make all db updates realtime
 ** Hide/Unhide book from Library (eye icon)
+** Ability to extend return by date
+** Add type of book, and description and link
+

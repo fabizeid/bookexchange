@@ -83,9 +83,8 @@
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <div style="padding: .75rem;">
-		    <truncate class="truncate" clamp=" Read more" :length="400" less="Read less" text=
-		    "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp" />
-		    <router-link to="/book/1230974">more info</router-link>
+		    <truncate v-if="book.descr" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
+		    <a v-if="book.link" :href="book.link">more info</a>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </div> <!-- b-collapse -->
@@ -162,6 +161,7 @@ export default {
 	showModal(book,type){
 	    this.selectedBook = book;
 	    this.$refs[type].show()
+            //helpDBUpdate(this);
 	},
         reserveBook(){
             let db = this.rootData.firebase.firestore();
@@ -386,6 +386,23 @@ function loadDb (vm) {
     return [unscubscribeTransaction, unscubscribeBooks];
 }
 
+//helper function which will be called manually to batch updateDB
+function helpDBUpdate(vm) {
+    //need to temp allow updates in rules
+    let db = vm.rootData.firebase.firestore();
+    let batch = db.batch();
+    console.log("updating DB");
+    db.collection("books").get()
+     	.then(function(querySnapshot) {
+	    querySnapshot.forEach(function(currDoc) {
+                batch.update(db.collection("books").doc(currDoc.id),
+                             {link: ""});    
+            });
+            batch.commit().then(function () {
+                console.log("batch commit");
+            });
+	})
+}
 /**
  * Find the index for an object with given key.
  *
