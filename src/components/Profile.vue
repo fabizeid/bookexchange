@@ -25,8 +25,8 @@
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'titleProf-'+index" style="padding: .75rem;">
-		    <p>{{book.descr}}</p>
-                    <a :href="book.link">more info</a>
+                    <p style="white-space: pre-wrap">{{book.descr}}</p>
+                    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </b-collapse>

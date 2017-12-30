@@ -84,7 +84,7 @@
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <div style="padding: .75rem;">
 		    <truncate v-if="book.descr" type="text" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
-		    <a v-if="book.link" :href="book.link">more info</a>
+		    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </div> <!-- b-collapse -->
@@ -122,7 +122,7 @@
 <script>
 
 import 'vue-awesome/icons/spinner'
-import truncate from './Truncate';
+import Truncate from './Truncate';
 
 
 let reactiveData = {
@@ -149,7 +149,7 @@ let nonreactiveData = {
 let unsubscribe = null;
 export default {
     name: 'Library',
-    components: { truncate },
+    components: { Truncate },
     data () {
 	reactiveData.rootData = this.$root.$data;
 	return reactiveData;
