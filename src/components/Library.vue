@@ -83,7 +83,7 @@
 	      <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <div style="padding: .75rem;">
-		    <truncate v-if="book.descr" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
+		    <truncate v-if="book.descr" type="text" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
 		    <a v-if="book.link" :href="book.link">more info</a>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
@@ -122,7 +122,7 @@
 <script>
 
 import 'vue-awesome/icons/spinner'
-import truncate from 'vue-truncate-collapsed';
+import truncate from './Truncate';
 
 
 let reactiveData = {

@@ -63,6 +63,9 @@ a {
     margin-right: 0;
 }
 
+.truncate > p {
+    white-space: pre-wrap;
+}
 .truncate > p > a {
     color: blue !important;
     font-size: 80%;
