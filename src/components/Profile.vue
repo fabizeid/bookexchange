@@ -27,6 +27,7 @@
 		  <b-collapse :id="'titleProf-'+index" style="padding: .75rem;">
                     <p style="white-space: pre-wrap">{{book.descr}}</p>
                     <a v-if="book.link" :href="book.link" target="_blank">more info</a>
+		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </b-collapse>
@@ -88,7 +89,7 @@
 		    		     :rows="6"
 		    		     :max-rows="6">{{book.descr}}</b-form-textarea>
 		    <b-form-input type="url" v-model.trim="book.link" placeholder="Optional URL"/>
-
+                    <b-form-select v-model="book.genre" :options="genres"/>
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleEdit(index,false)">Cancel</b-button>
 		      <b-button  size="sm" @click.prevent="toggleEdit(index,true)" variant="primary">Save</b-button>
@@ -101,20 +102,21 @@
 	      <td></td>
 	      <td>
 		<a v-b-tooltip.hover title="Add new book" href="#"
-		   @click.prevent="toggleCollapse('add-end')" class="float-right" size="sm">
+		   @click.prevent="toggleAdd()" class="float-right" size="sm">
 		  <icon name="plus"/></a>
 	      </td>
 	    </tr>
 	    <tr>
 		<td colspan="2" style="border-top-width: 0; padding: 0;">
 		  <b-collapse :id="'add-end'"  style="padding: .75rem;">
-		    <b-form-input type="text" v-model.trim="newBookTitle" placeholder="Title"/>
-		    <b-form-input type="text" v-model.trim="newBookAuthor" placeholder="Author"/>
-		    <b-form-textarea v-model="newBookDescr"
+		    <b-form-input type="text" v-model.trim="newBook.title" placeholder="Title"/>
+		    <b-form-input type="text" v-model.trim="newBook.author" placeholder="Author"/>
+		    <b-form-textarea v-model="newBook.descr"
 		    		     placeholder="Enter book description"
 		    		     :rows="6"
-		    		     :max-rows="6">{{newBookDescr}}</b-form-textarea>
-		    <b-form-input type="url" v-model.trim="newBookURL" placeholder="Optional URL"/>
+		    		     :max-rows="6">{{newBook.descr}}</b-form-textarea>
+		    <b-form-input type="url" v-model.trim="newBook.link" placeholder="Optional URL"/>
+                    <b-form-select v-model="newBook.genre" :options="genres"/>
 
 		    <div class="text-right mb-3">
 		      <b-button  size="sm" @click.prevent="toggleCollapse('add-end')">Cancel</b-button>
@@ -161,11 +163,11 @@ import Datepicker from 'vuejs-datepicker';
 
 let reactiveData = {};//will be filled by reset
 let nonreactiveData = {
-
-
-      description: "Mark Twain’s brilliant 19th-century novel has long been recognized as one of the finest examples of American literature. It brings back the irrepressible and free-spirited Huck, first introduced in The Adventures of Tom Sawyer, and puts him center stage. Rich in authentic dialect, folksy humor, and sharp social commentary, Twain’s classic tale follows Huck and the runaway",
-      availableDate:"2017-11-07",
-  };
+    genres: [{value:'', text:'Select genre'},'Art/Photograhy','Biography/Memoir', "Children's Books","Food",
+	     'History', 'Literature & Fiction','Mystery & Suspense','Romance',
+             'Sci-Fi & Fantasy','Teens & Young Adult'],
+    oldBookInfo:[]
+};
 
 let unsubscribe = null;
 export default {
@@ -216,8 +218,6 @@ export default {
 	    for (let i=0; i< inputEls.length; i++){
 		currentElem = inputEls[i];
 		currentElem.setAttribute("contenteditable",true);
-		currentElem.setAttribute("data-f-oldvalue",currentElem.innerHTML);
-		//currentElem.addEventListener("input", validate);
 	    }
 	    this.backupBook(id);
 
@@ -228,16 +228,15 @@ export default {
 	    let clickedSave = this.clickedSave;
 	    for (let i=0; i< inputEls.length; i++){
 		let element = inputEls[i];
+                let fieldName = element.getAttribute("data-f-field");
+		let index = Number(element.getAttribute("data-f-index"));
 		element.removeAttribute("contenteditable");
 		if(clickedSave){
-		    let fieldName = element.getAttribute("data-f-field");
-		    let index = Number(element.getAttribute("data-f-index"));
 		    this.myBooks[index][fieldName] = element.innerHTML;
 		} else {
-		    element.innerHTML = element.getAttribute("data-f-oldvalue");
+                    //this.myBooks[index][fieldName] still has old values
+                    element.innerHTML = this.myBooks[index][fieldName];
 		}
-
-		element.removeAttribute("data-f-oldvalue");
 	    }
 
 	    if(clickedSave){
@@ -248,7 +247,8 @@ export default {
                    title: self.myBooks[id].title,
                    author: self.myBooks[id].author,
                    descr: self.myBooks[id].descr,
-                   link: self.myBooks[id].link
+                   link: self.myBooks[id].link,
+                   genre: self.myBooks[id].genre
                 }).then(function() {
                   console.log("Document successfully updated!");
                  })
@@ -265,21 +265,10 @@ export default {
 	    this.clickedSave = false;
 	},
 	backupBook(id){
-	    //this.copyBook(this.myBooks[id],this.oldBookInfo[id]);
-	    this.oldBookInfo[id] = Object.assign({}, this.myBooks[id]);
+	     this.oldBookInfo[id] = Object.assign({}, this.myBooks[id]);
 	},
 	restoreBook(id){
-	    // doing manually since Object.assign({}) overwrote reactive listeners
-	    //this.myBooks[id] = Object.assign({},this.oldBookInfo[id]);
-	    let to = this.myBooks[id];
-	    let from = this.oldBookInfo[id];
-
-	    //Title and author are special case and restored differently
-	    //to.title = from.title ;
-	    //to.author = from.author ;
-	    to.type = from.type ;
-            to.descr = from.descr;
-            to.link = from.link;
+            Object.assign(this.myBooks[id],this.oldBookInfo[id]);
 	},
 	toggleCollapse(mid){
 	    this.$root.$emit("bv::toggle::collapse",mid);
@@ -293,16 +282,19 @@ export default {
             }
 	    this.toggleCollapse('add-'+ bid);
 	},
+        toggleAdd(){
+            //reset this.newBook
+            Object.assign(this.newBook,createNewBook());
+            this.toggleCollapse('add-end');
+        },
 	addBook(mid){
 	    //Add new book
 	    let db = this.rootData.firebase.firestore();
             let newBook = createNewBook();
-	    newBook.ownerID = this.rootData.uid;
+            //mutate this.newBook
+            Object.assign(newBook,this.newBook);
+            newBook.ownerID = this.rootData.uid;
             newBook.ownerName = this.rootData.name;
-            newBook.title = this.newBookTitle;
-            newBook.author = this.newBookAuthor;
-            newBook.descr = this.newBookDescr;
-            newBook.link = this.newBookURL;
 	    // Add to reactive array
 	    this.myBooks.push(newBook);
 	    this.toggleCollapse(mid);
@@ -420,7 +412,7 @@ export default {
 function createNewBook(){
     return {title: '',
             author: '',
-            type: '' ,
+            genre: '' ,
             descr: '',
             link: '',
             ownerID: '',
@@ -435,12 +427,12 @@ function reset(){
     Object.assign(reactiveData,
     {    reservedBooks: [],
          myBooks:[],
-         oldBookInfo:[],
+         newBook: createNewBook(),
          newBookTitle: '',
          newBookAuthor: '',
          newBookDescr: '',
          newBookURL: '',
-         newBooktype: '',         
+         newBookGenre: null,         
          transactions: {},
          loading: false,
          selectedBook: {},
@@ -470,7 +462,7 @@ function loadDb (vm) {
 		    if (change.type === "modified") {
 			/*Can't use indexing as Vue will not trigger*/
 			reactiveData.reservedBooks.splice(index,1,dt);
-			console.log("Modified : ", key);
+			console.log("Modified Pofile ResBook: ", key);
 		    } else {
 			if (change.type === "removed") {
 			    reactiveData.reservedBooks.splice(index,1 );
@@ -495,7 +487,7 @@ function loadDb (vm) {
 		} else {
 		    if (change.type === "modified") {
                         transactions[bookKey].push(dt);
-			console.log("Modified : ", change.doc.id);
+			console.log("Modified Trans: ", change.doc.id);
 		    } else {
 			if (change.type === "removed") {
                             transactions[bookKey] = [];

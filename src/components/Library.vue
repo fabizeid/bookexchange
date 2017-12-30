@@ -14,8 +14,8 @@
 	  <b-dropdown   id="ddown1" text="Filter" >
 	      <b-form-checkbox v-model="allSelected"
 	  		       :indeterminate="indeterminate"
-	  		       aria-describedby="genre"
-	  		       aria-controls="genre"
+	  		       aria-describedby="genres"
+	  		       aria-controls="genres"
   		       class="ml-3"
 	  		       @change="toggleAll"
 	  		       >
@@ -32,11 +32,11 @@
 	  			   aria-label="availability"
 	  			   ></b-form-checkbox-group>
 	      <b-dropdown-divider class="mt-0" ></b-dropdown-divider>
-	      <b-form-checkbox-group id="genre"
+	      <b-form-checkbox-group id="genres"
 	  			   stacked
-	  			   v-model="selectedType"
-	  			   name="genre"
-	  			   :options="genre"
+	  			   v-model="selectedGenre"
+	  			   name="genres"
+	  			   :options="genres"
 	  			   class="ml-3"
 	  			   aria-label="Book Genre"
 	  			   ></b-form-checkbox-group>
@@ -85,7 +85,8 @@
 		  <div style="padding: .75rem;">
 		    <truncate v-if="book.descr" type="text" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
 		    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
-		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
+		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
+		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>                    
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </div> <!-- b-collapse -->
 		</td>
@@ -132,19 +133,20 @@ let reactiveData = {
     transactionStatus: {},
     filter: null,
     selectedAvail: [],
-    selectedType: [],
+    selectedGenre: [],
     allSelected: false,
     indeterminate: false,
-    sortSelected: 'Default',
+    sortSelected: 'Date Added',
     loading: false,
     selectedBook: {}
 };
 
 let nonreactiveData = {
-    genre: ['Biography/Memoir', 'Art/Photograhy',
-	      'History', 'Romance', 'Fiction'],
+    genres: ['Art/Photograhy','Biography/Memoir', "Children's Books","Food",
+	     'History', 'Literature & Fiction','Mystery & Suspense','Romance',
+            'Sci-Fi & Fantasy','Teens & Young Adult'],
     availability: ['Available','Reserved'],
-    sortOptions: ['Default','Title','Author','Date Added']
+    sortOptions: ['Date Added','Title','Author']
     }
 let unsubscribe = null;
 export default {
@@ -211,8 +213,8 @@ export default {
                 })
         },
 	toggleAll (checked) {
-	    this.selectedType = checked ?
-		this.genre.slice() : [];
+	    this.selectedGenre = checked ?
+		this.genres.slice() : [];
 	    this.selectedAvail = checked ?
 		this.availability.slice() : [];
 	},
@@ -224,9 +226,9 @@ export default {
 		test = regex.test(itemSearchStr);
 		regex.lastIndex = 0;
 	    }
-	    if(this.selectedType.length) {
+	    if(this.selectedGenre.length) {
  		test = test &&
-                    (this.selectedType.indexOf(item.type) !== -1);
+                    (this.selectedGenre.indexOf(item.genre) !== -1);
 	    }
 	    if(this.selectedAvail.length) {
                 let availability = (item.borrowerID?"Reserved":"Available");
@@ -239,7 +241,7 @@ export default {
             if (totalNumSelected === 0) {
 		this.indeterminate = false
 		this.allSelected = false
-	    } else if (totalNumSelected === (this.genre.length +
+	    } else if (totalNumSelected === (this.genres.length +
                                              this.availability.length)) {
 		this.indeterminate = false
 		this.allSelected = true
@@ -254,29 +256,26 @@ export default {
 	    let orderBy = require('lodash.orderby');
 	    let self = this;
 	    let filteredBooks = self.booksFB.filter(self.filterFunc);
-            if (self.sortSelected != 'Default') {
-		console.log(self.sortSelected);
-                if(self.sortSelected == "Date Added"){
-                    filteredBooks =
-                            orderBy(filteredBooks,
-                                    [book => book.createdTime],['desc']);
-                } else {
-		        filteredBooks =
-                            orderBy(filteredBooks,
-                                    [book => book[self.sortSelected.toLowerCase()].toLowerCase()]);
-                    }
-	    }
+            if(self.sortSelected == "Date Added"){
+                filteredBooks =
+                    orderBy(filteredBooks,
+                            [book => book.createdTime],['desc']);
+            } else {
+		filteredBooks =
+                    orderBy(filteredBooks,
+                            [book => book[self.sortSelected.toLowerCase()].toLowerCase()]);
+            }
 	    return filteredBooks;
 	}
     },
     watch: {
 	selectedAvail (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
-            let totalNumSelected = newVal.length + this.selectedType.length; 
+            let totalNumSelected = newVal.length + this.selectedGenre.length; 
             this.setSelectionFlags(totalNumSelected);
         },
         
-        selectedType (newVal, oldVal) {
+        selectedGenre (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
             let totalNumSelected = newVal.length + this.selectedAvail.length;
             this.setSelectionFlags(totalNumSelected);
@@ -396,7 +395,7 @@ function helpDBUpdate(vm) {
      	.then(function(querySnapshot) {
 	    querySnapshot.forEach(function(currDoc) {
                 batch.update(db.collection("books").doc(currDoc.id),
-                             {link: ""});    
+                             {genre: ""});    
             });
             batch.commit().then(function () {
                 console.log("batch commit");

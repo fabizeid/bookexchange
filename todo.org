@@ -12,7 +12,7 @@ Library:
 *** book owner gets notification: reservation request
 *** DONE book owner has current user added to list of possible
 * DONE click unreserve: open modal asking if you are sure
-** click ok:
+** DONE click ok:
 *** DONE close modal
 *** DONE change unreserve to reserve
 *** book owner gets notification: reservation cancelled
@@ -34,3 +34,6 @@ Library:
 ** Ability to extend return by date
 ** DONE Add type of book, and description and link
 ** DONE add support for formatted description
+** history of book transactions
+** validation: dates picked, email,
+** send email notification when request
