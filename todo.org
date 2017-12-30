@@ -32,5 +32,5 @@ Library:
 ** DONE Make all db updates realtime
 ** Hide/Unhide book from Library (eye icon)
 ** Ability to extend return by date
-** Add type of book, and description and link
-
+** DONE Add type of book, and description and link
+** DONE add support for formatted description

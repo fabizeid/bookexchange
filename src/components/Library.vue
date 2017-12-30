@@ -434,8 +434,6 @@ function indexForKey (array, key) {
     padding-bottom: 2px;
     border: 0px;
     padding-top: 0rem;
-
-
 }
 
 /* a:{ */

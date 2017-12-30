@@ -47,6 +47,10 @@ table {
     table-layout: fixed;
 }
 
+.table td:last-child{
+    width: 10rem;
+}
+
 a {
     overflow-wrap: break-word;
     word-break: break-word;
