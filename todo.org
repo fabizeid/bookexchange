@@ -18,7 +18,7 @@ Library:
 *** book owner gets notification: reservation cancelled
 *** DONE book owner has current user removed from list of possible
 * click extend reservation:
-* Change search,filtering,sorting ui to look like logs ui of firebase function
+* DONE Change search,filtering,sorting ui to look like logs ui of firebase function
 * DONE Book state: Available, reserved
 * DONE Button: reserve, unreserve(pending), disabled (when reserved)
 ** DONE create pendingreservation table with:

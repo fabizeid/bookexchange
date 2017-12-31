@@ -2,8 +2,9 @@
 <template>
   <div class="profile container">
    <div class="boxedTable">
-    <h2 id="bookTitle">Books I borrowed</h2>
-	<table class="table">
+     <h2 id="bookTitle">Books I borrowed</h2>
+     <h5 style="padding: 1rem" v-if="reservedBooks.length == 0">None yet</h5>
+     <table v-else class="table">
 	  <tbody>
             <template v-for="(book, index) in reservedBooks"> <!-- :key="book.key" -->
 	    <tr>
@@ -140,7 +141,7 @@
   	<b-modal ref="returnModal" @ok="returnBook()">
   	  <a>Make "{{selectedBook.title}}" available for reservation?</a>
   	</b-modal>
-	<b-modal ref="reserveModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
+	<b-modal id="reserveModal" ref="reserveModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
           <form @submit.stop.prevent> <!-- ="handleSubmit" -->
             <label for="rsrvSelect" class="d-block text-left">Select borrower:</label>
             <b-form-select id="rsrvSelect" v-model="selectedBorrower" :options="borrowers" class="d-block mb-3"/>
@@ -556,6 +557,9 @@ a:-webkit-any-link {
 .datepickerCalendar{
     right:0px;
 }
+#reserveModal .modal-title {
+    max-width: 280px;
+    }
 </style>
 
 

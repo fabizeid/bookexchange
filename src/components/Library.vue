@@ -5,7 +5,7 @@
     <div class="boxedTable">
       <h2 id="bookTitle">Book List</h2>
 	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
-	  <b-col sm="6">
+	  <b-col cols="12" md="6">
 	    <b-form-input v-model="filter" placeholder="Search author or title" />
 	  </b-col>
 	  <b-col class="py-2" >
@@ -428,21 +428,16 @@ function indexForKey (array, key) {
     background-color: transparent;
     color: black;
     padding: .8rem .2rem;
-    /*line-height: 1;*/
     font-weight: bold;
     padding-bottom: 2px;
     border: 0px;
     padding-top: 0rem;
 }
-
-/* a:{ */
-/*     text-decoration: none; */
-/* } */
-
-/* a:hover { */
-/*     text-decoration: underline; */
-/*     color: #333333; */
-/* } */
+/*Add scrollbar to menu*/
+#ddown1 > .dropdown-menu.show {
+    max-height: 15rem;
+    overflow-x: hidden;
+}
 
 a:any-link {
   text-decoration: underline;
