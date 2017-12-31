@@ -1,17 +1,13 @@
-
-$box-bg: #afbdc6;
-$dropdown-bg: darken($box-bg,10%);
-$body_bg: $dropdown-bg;
-$input-bg: lighten($box-bg,10%);
-$custom-select-bg: $input-bg;
+$table-border-width: 4px;
+$boxtitle-bg: #e9ecef;//$gray-200
 $custom-select-indicator: none;
 @import "node_modules/bootstrap/scss/bootstrap";
 
 .boxedTable {
     padding: 1rem .5rem 1rem .5rem;
     margin-bottom: .5rem;
-    background-color:$box-bg;
     position: relative; //to overlay spinner using absolute position
+    box-shadow: 4px 6px 8px 4px rgba(#000,.4);
 }
 
 .booktitle,h1{
@@ -40,7 +36,8 @@ $custom-select-indicator: none;
 
 h2 {
     padding: 1rem;
-    background-color: hsla(203, 17%, 67%, 1);
+    background-color: $boxtitle-bg;
+    border-radius: 10px;
 }
 /* needed to avoid table stretching if title or author two long */
 table {
@@ -94,72 +91,3 @@ a {
  .modal-dialog {
      display: inline-block;
  }
-
-/* * { */
-/*     font-family: "Merriweather", serif; */
-/* } */
-
-
-
-/******************************************************88
-*
-* Fancy css with img background
-*
-***********************************************************
-//From http://s3.amazonaws.com/wrapbootstrap/live/products/600x375/WB072S837.png
-// From http://hakayaatdar.wixsite.com/hakaya
-$body-bg: #414141; //#252830;//#414141;
-
-
-$bimg: "https://static.wixstatic.com/media/464be2_c3f291e854b2428780bf0fc7e279daa8~mv2.jpg/v1/fill/w_1080,h_810,al_c,q_85/464be2_c3f291e854b2428780bf0fc7e279daa8~mv2.webp";
-
-$body-color: lighten($body-bg,70%);
-$lighter: lighten($body-bg,10%);
-$darker: darken($body-bg,10%);
-$darktransp: rgba(#000,.2);
-$input-bg: $darktransp;//$lighter; //#434857;
-$input-disabled-bg: $input-bg;
-$input-color: #fff;
-$input-placeholder-color: lighten($body-bg,40%);
-$border-color: $lighter;
-$table-border-color: $border-color;
-$table-bg: rgba(5,5,5,.31);//$darktransp;
-$table-head-bg: rgba(131,114,68,.69);
-$table-head-color: rgb(220, 200, 164);
-$card-bg: $table-bg;
-$dropdown-bg: rgba(50,50,50,1);
-
-@import "node_modules/bootstrap/scss/functions";
-@import "node_modules/bootstrap/scss/variables";
-
-$theme-colors: map-merge($theme-colors,("dark": $darker));
-
-@import "node_modules/bootstrap/scss/bootstrap";
-
-.btn-secondary {
-    //button-variant($background $border $active-background $active-border)
-    @include button-variant($body-bg, $border-color, $input-bg,$border-color);
-}
-
-.table {
-    th {
-	background-color: $table-head-bg;
-	color: $table-head-color;
-    }
-
-
-}
-
-body {
-    background-image: url($bimg);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-
-#bookTitle {
-//    font-family: "Tangerine", $font-family-base;
-//    font-weight: 600;
-//    text-shadow: 4px 4px 4px #aaa;
-}
-*/
