@@ -20,7 +20,6 @@
 		<small>
 		  <strong class="text-nowrap">Due: </strong>{{book.dueDate}}
 		</small>
-		<br><a href="#" @click.prevent="showModal(book,'extendModal')" class="text-right" size="sm">Extend</a>
 	      </td>
             </tr>
 	      <tr>
@@ -38,17 +37,6 @@
 	  </tbody>
 	</table>
    </div>
-
-	<b-modal ref="extendModal">
-	  <pre>
-
-  Hello,
-  To extend "{{selectedBook.title}}"
-  please contact: "{{selectedBook.author}}"
-
-	  </pre>
-	</b-modal>
-
    <div class="boxedTable">
       <h2 id="bookTitle">Books I own</h2>
 	<table class="table">
@@ -74,6 +62,8 @@
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
                     <a v-if="book.borrowerID" href="#" @click.prevent= "showModal(book,'returnModal')">Return</a>
                     <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'lendModal')">Lend</a>
+                    <a v-b-tooltip.hover :title="book.hide?'Show':'Hide'" href="#" @click.prevent="showModal(book,'hideBookModal')">
+		      <icon :name="book.hide?'eye-slash':'eye'"/></a>
                     <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
 		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showModal(book,'deleteModal')">
@@ -133,7 +123,10 @@
 	  <br/>
 	  <a>Loading...</a>
 	</div>
-
+  	<b-modal v-if="myBooks.length" ref="hideBookModal" @ok="toggleBookVisibility()">
+  	  <a>Are you sure you want to {{selectedBook.hide?'show in':'hide from'}} Library:
+            {{selectedBook.title}}</a>
+  	</b-modal>
   	<b-modal v-if="myBooks.length" ref="deleteModal" @ok="removeBook()">
   	  <a>Are you sure you want to delete:
             {{selectedBook.title}}</a>
@@ -154,7 +147,8 @@
 </template>
 
 <script>
-
+import 'vue-awesome/icons/eye'
+import 'vue-awesome/icons/eye-slash'
 import 'vue-awesome/icons/trash'
 import 'vue-awesome/icons/pencil'
 import 'vue-awesome/icons/plus'
@@ -305,6 +299,21 @@ export default {
 		  console.error("Error adding document: ", error);
 	      });
 	},
+        toggleBookVisibility: function(){
+            let book = this.selectedBook;
+            let db = this.rootData.firebase.firestore();
+
+	    //update DB
+	    db.collection("books").doc(book.key)
+                .update({hide:!book.hide}).then(function() {
+                    book.hide = !book.hide;
+		    console.log("Visibility updated successfully !");
+	        }).catch(function(error) {
+		    console.error("Error in visibility update: ", error);
+	        });
+
+        },
+
 	removeBook: function () {
             let book = this.selectedBook;
 	    let db = this.rootData.firebase.firestore();
@@ -416,6 +425,7 @@ function createNewBook(){
             borrowerID:'',
             borrowerName:'',
             dueDate: '',
+            hide: false,
             reserved: false};
 }
 
@@ -424,11 +434,6 @@ function reset(){
     {    reservedBooks: [],
          myBooks:[],
          newBook: createNewBook(),
-         newBookTitle: '',
-         newBookAuthor: '',
-         newBookDescr: '',
-         newBookURL: '',
-         newBookGenre: null,
          transactions: {},
          loading: false,
          selectedBook: {},

@@ -65,7 +65,7 @@
                   <a>{{book.dueDate?book.dueDate:"now"}}</a>
 		</small>
 		<br>
-                <a v-if="book.borrowerID">
+                <a v-if="book.borrowerID == rootData.uid">
                   Reserved
                 </a>
                 <a v-else-if="transactionStatus[book.key] == 'pending'"
@@ -86,7 +86,7 @@
 		    <truncate v-if="book.descr" type="text" class="truncate" clamp="...more" :length="400" less="(less)" :text="book.descr"/>
 		    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
 		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
-		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>                    
+		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
 	      	  </div> <!-- b-collapse -->
 		</td>
@@ -271,10 +271,10 @@ export default {
     watch: {
 	selectedAvail (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
-            let totalNumSelected = newVal.length + this.selectedGenre.length; 
+            let totalNumSelected = newVal.length + this.selectedGenre.length;
             this.setSelectionFlags(totalNumSelected);
         },
-        
+
         selectedGenre (newVal, oldVal) {
 	    // Handle changes in individual flavour checkboxes
             let totalNumSelected = newVal.length + this.selectedAvail.length;
@@ -333,7 +333,7 @@ function loadDb (vm) {
 		    //it shouldn't happen but in case there several
                     //transaction with same bookID and borrowID only
                     //one is used(last one overrides the rest)
-                    
+
                     //we are using set here since since we are adding new
                     //properties and we want them to be reactive
                     setReactive(reactiveData.transactionStatus,dt.bookID,dt.status);
@@ -355,7 +355,7 @@ function loadDb (vm) {
             });
 
 	});
-    let unscubscribeBooks =  db.collection("books")
+    let unscubscribeBooks =  db.collection("books").where("hide", "==", false)
 	.onSnapshot(function(snapshot) {
             snapshot.docChanges.forEach(function(change) {
 		let dt = change.doc.data();
@@ -395,7 +395,7 @@ function helpDBUpdate(vm) {
      	.then(function(querySnapshot) {
 	    querySnapshot.forEach(function(currDoc) {
                 batch.update(db.collection("books").doc(currDoc.id),
-                             {genre: ""});    
+                             {hide: false});
             });
             batch.commit().then(function () {
                 console.log("batch commit");
