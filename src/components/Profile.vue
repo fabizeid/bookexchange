@@ -73,7 +73,7 @@
 		  <div>
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
                     <a v-if="book.borrowerID" href="#" @click.prevent= "showModal(book,'returnModal')">Return</a>
-                    <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'reserveModal')">Lend</a>
+                    <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'lendModal')">Lend</a>
                     <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
 		      <icon name="pencil"/></a>
 		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showModal(book,'deleteModal')">
@@ -141,7 +141,7 @@
   	<b-modal ref="returnModal" @ok="returnBook()">
   	  <a>Make "{{selectedBook.title}}" available for reservation?</a>
   	</b-modal>
-	<b-modal id="reserveModal" ref="reserveModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
+	<b-modal id="lendModal" ref="lendModal" :title="'Lend '+selectedBook.title" @ok="lendBook()">
           <form @submit.stop.prevent> <!-- ="handleSubmit" -->
             <label for="rsrvSelect" class="d-block text-left">Select borrower:</label>
             <b-form-select id="rsrvSelect" v-model="selectedBorrower" :options="borrowers" class="d-block mb-3"/>
@@ -187,24 +187,19 @@ export default {
 	},
         showModal(book,modalRef){
 	    this.selectedBook = book;
-            if(modalRef == 'reserveModal'){
+            if(modalRef == 'lendModal'){
                 //fill borrowers select options for current book
                 let borrowReqArr = this.transactions[book.key];
-                let borrowers = this.borrowers;
+                let borrowers = {};
                 let setReactive = this.$set;//vue set api
                 for(let i = 0; i < borrowReqArr.length; i++)
                 {
                     let borrowerID = borrowReqArr[i].borrowerID;
                     let borrowerName = borrowReqArr[i].borrowerName;
-                    if (borrowers.hasOwnProperty(borrowerID)){
-                        //already reactive
-                        borrowers[borrowerID] = {value: borrowerID,
-                                                 text: borrowerName};
-                    } else {
-                        setReactive(borrowers,borrowerID,{value: borrowerID,
-                                                          text: borrowerName});
-                    }
+                    setReactive(borrowers,borrowerID,{value: borrowerID,
+                                                      text: borrowerName});
                 }
+                this.borrowers = borrowers;
                 //first borrowers element
                 this.selectedBorrower = borrowReqArr[0].borrowerID;
             }
@@ -339,7 +334,6 @@ export default {
                 indexForKey(borrowReqsForCurrentBook,borrowerID,'borrowerID');
             let transKey = borrowReqsForCurrentBook[transIdx].transID;
             let batch = db.batch();
-
             batch.update(db.collection("books").doc(book.key),
                          {
                              borrowerID: borrowerID,
@@ -351,8 +345,9 @@ export default {
                 book.borrowerID = borrowerID;
                 book.borrowerName = borrowerName;
                 book.dueDate = selectedDueDate;
-                //remove trans from reactive variable
-	        borrowReqsForCurrentBook.splice(transIdx,1);
+                //Shouldn't remove transaction here, since it will be
+                //removed by the DB callback when it is deleted from
+                //the DB
                 console.log("lending successfully updated!");
             }).catch(function(error) {
                 console.error("Error lending book: ", error);
@@ -433,7 +428,7 @@ function reset(){
          newBookAuthor: '',
          newBookDescr: '',
          newBookURL: '',
-         newBookGenre: null,         
+         newBookGenre: null,
          transactions: {},
          loading: false,
          selectedBook: {},
@@ -491,7 +486,9 @@ function loadDb (vm) {
 			console.log("Modified Trans: ", change.doc.id);
 		    } else {
 			if (change.type === "removed") {
-                            transactions[bookKey] = [];
+                            let transIdx =
+                                indexForKey(transactions,change.doc.id,'transID');
+                            reactiveData.transactions[bookKey].splice(transIdx,1);
 			    console.log("Removed: ", change.doc.id);
 			}
 		    }
@@ -557,7 +554,7 @@ a:-webkit-any-link {
 .datepickerCalendar{
     right:0px;
 }
-#reserveModal .modal-title {
+#lendModal .modal-title {
     max-width: 280px;
     }
 </style>
