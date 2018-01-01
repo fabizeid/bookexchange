@@ -1,7 +1,7 @@
 <!-- https://www.goodreads.com/search?q=mark+twain -->
 <!-- Check logs of functions for filtering/searching -->
 <template>
-  <div v-if="rootData.signedIn" class="library container">
+  <div class="library container">
     <div class="boxedTable">
       <h2 id="bookTitle">Book List</h2>
 	<b-row @click.stop class="mb-3 align-items-center"> <!-- style="white-space: nowrap" class="d-flex" -->
@@ -60,24 +60,29 @@
 		<a>by {{book.author}}</a>
 	      </td>
               <td class="text-right">
-		<small>
-		  <strong class="text-nowrap">Available:</strong>
-                  <a>{{book.dueDate?book.dueDate:"now"}}</a>
-		</small>
-		<br>
-                <a v-if="book.borrowerID == rootData.uid">
-                  Reserved
+                <span v-if="rootData.signedIn">
+                  <small>
+		    <strong class="text-nowrap">Available:</strong>
+                    <a>{{book.dueDate?book.dueDate:"now"}}</a>
+		  </small>
+		  <br>
+                  <a v-if="book.borrowerID == rootData.uid">
+                    Borrowed
+                  </a>
+                  <a v-else-if="transactionStatus[book.key] == 'pending'"
+                     href="#" @click.prevent="showModal(book,'unborrowModal')" size="sm">
+		    Pending
+		  </a>
+                  <a v-else-if="transactionStatus[book.key] == 'wait'">
+                    Wait ...
+                  </a>
+                  <a v-else href="#" @click.prevent="showModal(book,'borrowModal')" size="sm">
+		    Borrow
+		  </a>
+                </span>
+                <a v-else>
+                    Login to Borrow
                 </a>
-                <a v-else-if="transactionStatus[book.key] == 'pending'"
-                   href="#" @click.prevent="showModal(book,'unreserveModal')" size="sm">
-		  Pending
-		</a>
-                <a v-else-if="transactionStatus[book.key] == 'wait'">
-                  Wait ...
-                </a>
-                <a v-else href="#" @click.prevent="showModal(book,'reserveModal')" size="sm">
-		  Reserve
-		</a>
 	      </td>
             </tr>
 	      <tr>
@@ -87,7 +92,7 @@
 		    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
 		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
-		    <br><small><strong>Added by: </strong>
+		    <br><small v-if="rootData.signedIn"><strong>Added by: </strong>
                       <a v-b-tooltip.hover :title="book.ownerEmail" href="#" @click.prevent>{{book.ownerName}}</a></small>
 	      	  </div> <!-- b-collapse -->
 		</td>
@@ -101,17 +106,18 @@
 	  <a>Loading...</a>
 	</div>
     </div>
-
-    <b-modal ref="reserveModal" @ok="reserveBook()">
-      <a>Reserve "{{selectedBook.title}}" by {{selectedBook.author}}?</a>
+    <span v-if="rootData.signedIn">
+    <b-modal ref="borrowModal" @ok="borrowBook()">
+      <a>Borrow "{{selectedBook.title}}" by {{selectedBook.author}}?</a>
     </b-modal>
     <b-modal ref="pendingModal" okOnly>
       <p>Request notification for "{{selectedBook.title}}" was sent successfully.</p>
       <p>Please contact {{selectedBook.ownerName}} at {{selectedBook.ownerEmail}} to coordinate exchange.</p>
     </b-modal>
-    <b-modal ref="unreserveModal" @ok="unreserveBook()">
+    <b-modal ref="unborrowModal" @ok="unborrowBook()">
       <a> Cancel reservation of "{{selectedBook.title}}" by {{selectedBook.author}}?</a>
     </b-modal>
+    </span>
   </div>
 </template>
 
@@ -121,33 +127,23 @@ import 'vue-awesome/icons/spinner'
 import Truncate from './Truncate';
 
 
-let reactiveData = {
-
-    booksFB: [],
-    //status could be: none, pending, wait, reserved
-    transactionStatus: {},
-    filter: null,
-    selectedAvail: [],
-    selectedGenre: [],
-    allSelected: false,
-    indeterminate: false,
-    sortSelected: 'Date Added',
-    loading: false,
-    selectedBook: {}
-};
+let reactiveData = {};
 
 let nonreactiveData = {
     genres: ['Art/Photograhy','Biography/Memoir', "Children's Books","Food",
 	     'History', 'Literature & Fiction','Mystery & Suspense','Romance',
             'Sci-Fi & Fantasy','Teens & Young Adult'],
-    availability: ['Available','Reserved'],
-    sortOptions: ['Date Added','Title','Author']
+    availability: ['Available','Borrowed'],
+    sortOptions: ['Date Added','Title','Author'],
+    switchedLoginStatus: true
     }
-let unsubscribe = null;
+let unsubscribe = [];
 export default {
     name: 'Library',
     components: { Truncate },
     data () {
+        reset();
+        reactiveData.booksFB = [];
 	reactiveData.rootData = this.$root.$data;
 	return reactiveData;
     },
@@ -160,7 +156,7 @@ export default {
 	    this.$refs[type].show()
             //helpDBUpdate(this);
 	},
-        reserveBook(){
+        borrowBook(){
             let db = this.rootData.firebase.firestore();
             let book = this.selectedBook;
             let key = book.key;
@@ -184,7 +180,7 @@ export default {
                 });
 
         },
-        unreserveBook(){
+        unborrowBook(){
             let db = this.rootData.firebase.firestore();
             let book = this.selectedBook;
             let key = book.key;
@@ -227,7 +223,7 @@ export default {
                     (this.selectedGenre.indexOf(item.genre) !== -1);
 	    }
 	    if(this.selectedAvail.length) {
-                let availability = (item.borrowerID?"Reserved":"Available");
+                let availability = (item.borrowerID?"Borrowed":"Available");
 		test = test &&
                     (this.selectedAvail.indexOf(availability) !== -1);
 	    }
@@ -277,31 +273,23 @@ export default {
             this.setSelectionFlags(totalNumSelected);
 	},
 	'rootData.signedIn': function (signedIn) {
-	    if(signedIn) {
-		// User is signed in.
-		if(!unsubscribe) unsubscribe =
-		    loadDb(this);
-	    } else {
-		// User is signed out.
-		if (unsubscribe) {
-		    unsubscribe[0]();unsubscribe[1]();
-		    unsubscribe = null
-		}
-		reactiveData.booksFB = [];
-	    }
+            for(let i=0; i<unsubscribe.length;i++){
+                unsubscribe[i]();
+            }
+            //reload DB from appropriate collection
+            nonreactiveData.switchedLoginStatus = true;
+	    unsubscribe = loadDb(this);
 	    console.log(" watch signed in "+ signedIn);
 	}
     },
     created: function(){
 	console.log("Library created");
-
+        nonreactiveData.switchedLoginStatus = true;
         //Set non reactive Data
         Object.assign(this, nonreactiveData);
         /*will only be called once when created, for subsequent
          signins we use the watch*/
-
-	if (this.rootData.signedIn)
-	    unsubscribe = loadDb(this);
+	unsubscribe = loadDb(this);
     }
 
 } //export
@@ -315,13 +303,33 @@ export default {
 //validation: https://vuejs.org/v2/examples/firebase.html
 */
 
+function reset(){
+    // reset everything except booksFB
+    //That's so that we delay resetting booksFB as much as poosible
+    //to avoid blanking the screen when switching login status
+    Object.assign(reactiveData,
+                  {    transactionStatus: {},
+                       filter: null,
+                       selectedAvail: [],
+                       selectedGenre: [],
+                       allSelected: false,
+                       indeterminate: false,
+                       sortSelected: 'Date Added',
+                       loading: true,
+                       selectedBook: {}
+                  });
+}
 
 function loadDb (vm) {
     let db = vm.rootData.firebase.firestore();
     let uid = vm.rootData.uid;
     let setReactive = vm.$set;//vue set api
-    reactiveData.loading = true;
-    let unscubscribeTransaction = db.collection("transaction").where("borrowerID", "==", uid)
+    let signedIn = vm.rootData.signedIn;
+    let unscubscribeCbs = [];
+    let bookCollection = "publicBooks"
+    reset();
+    if (signedIn) {
+    let unscubscribeTrans = db.collection("transaction").where("borrowerID", "==", uid)
 	.onSnapshot(function(snapshot) {
             snapshot.docChanges.forEach(function(change) {
 		let dt = change.doc.data();
@@ -351,8 +359,17 @@ function loadDb (vm) {
             });
 
 	});
-    let unscubscribeBooks =  db.collection("books").where("hide", "==", false)
+        unscubscribeCbs.push(unscubscribeTrans);
+        bookCollection = "books";
+    }
+    let unscubscribeBooks =  db.collection(bookCollection)
+        .where("hide", "==", false)
 	.onSnapshot(function(snapshot) {
+            if(nonreactiveData.switchedLoginStatus){
+                //doing this here so that the page switches smoothly
+                reactiveData.booksFB = [];
+                nonreactiveData.switchedLoginStatus = false;
+            };
             snapshot.docChanges.forEach(function(change) {
 		let dt = change.doc.data();
 		let key = change.doc.id;
@@ -378,7 +395,8 @@ function loadDb (vm) {
             });
 	    reactiveData.loading = false;
 	});
-    return [unscubscribeTransaction, unscubscribeBooks];
+    unscubscribeCbs.push(unscubscribeBooks);
+    return unscubscribeCbs;
 }
 
 //helper function which will be called manually to batch updateDB

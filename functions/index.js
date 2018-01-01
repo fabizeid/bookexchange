@@ -64,16 +64,65 @@ exports.deleteUser = functions.auth.user().onDelete(event => {
 	});    
 });
 
-//createBook({title: 'foo@'}, {params: {bookId: 'aaa'}})
+/*
+createBook({title: 'foo@',author:'ds',genre:'ds',descr:'ds',link:'ff',hide:false},
+           {params: {bookId: '9kRZYjyCBawVIEyKTPrS'}})
+*/
 /*Could also do this from client:
 var updateTimestamp = docRef.update({
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-});*/
+    });*/
+//Important: acording to doc firestore functions are not guaranteed yet,
+// they could happen several times or not at all
+// see: https://firebase.google.com/docs/firestore/extend-with-functions#limitations_and_guarantees
 exports.createBook = functions.firestore
   .document('books/{bookId}')
     .onCreate(event => {
-      return event.data.ref.set({
+        let bookId = event.params.bookId;
+        let db = admin.firestore();
+        let batch = db.batch();
+        let newData = event.data.data();
+        batch.update(event.data.ref,{
           //https://stackoverflow.com/questions/47270773/how-to-get-current-user-id-in-firebase-cloud-functions-with-firestore-trigger
           createdTime: event.data.createTime
-      }, {merge: true});
+        });
+        batch.set(db.collection("publicBooks").doc(bookId),
+                  {title: newData.title,
+                   author: newData.author,
+                   genre: newData.genre,
+                   descr: newData.descr,
+                   link: newData.link,
+                   hide: newData.hide,
+                   createdTime: event.data.createTime});
+        return batch.commit();
   });
+/*
+updateBook({before:{},after:{title: 'foo@',author:'ds',genre:'ds',descr:'ds',link:'ff',hide:false}},
+           {params: {bookId: 'XnH4SnCzz8T5uIEvrku0'}})
+*/
+
+exports.updateBook = functions.firestore
+  .document('books/{bookId}')
+    .onUpdate(event => {
+        let bookId = event.params.bookId;
+        let db = admin.firestore();
+        let newData = event.data.data();
+        return db.collection("publicBooks").doc(bookId).update({
+            title: newData.title,
+            author: newData.author,
+            genre: newData.genre,
+            descr: newData.descr,
+            link: newData.link,
+            hide: newData.hide
+        });
+    });
+/*
+deleteBook({},{params: {bookId: '9kRZYjyCBawVIEyKTPrS'}})
+*/
+exports.deleteBook = functions.firestore
+  .document('books/{bookId}')
+    .onDelete(event => {
+        let bookId = event.params.bookId;
+        let db = admin.firestore();
+        return db.collection("publicBooks").doc(bookId).delete();
+    });
