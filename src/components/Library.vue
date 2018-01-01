@@ -87,7 +87,8 @@
 		    <a v-if="book.link" :href="book.link" target="_blank">more info</a>
 		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
-		    <br><small><strong>Added by: </strong>{{book.ownerName}}</small>
+		    <br><small><strong>Added by: </strong>
+                      <a v-b-tooltip.hover :title="book.ownerEmail" href="#" @click.prevent>{{book.ownerName}}</a></small>
 	      	  </div> <!-- b-collapse -->
 		</td>
 	      </tr>
@@ -101,22 +102,16 @@
 	</div>
     </div>
 
-	<b-modal ref="reserveModal" @ok="reserveBook()">
-	  <pre>
-
-       Reserve book
-         "{{selectedBook.title}}" by {{selectedBook.author}}?
-	  </pre>
-	</b-modal>
-
-	<b-modal ref="unreserveModal" @ok="unreserveBook()">
-	  <pre>
-        Cancel reservation of
-           "{{selectedBook.title}}" by {{selectedBook.author}}?
-	  </pre>
-	</b-modal>
-
-
+    <b-modal ref="reserveModal" @ok="reserveBook()">
+      <a>Reserve "{{selectedBook.title}}" by {{selectedBook.author}}?</a>
+    </b-modal>
+    <b-modal ref="pendingModal" okOnly>
+      <p>Request notification for "{{selectedBook.title}}" was sent successfully.</p>
+      <p>Please contact {{selectedBook.ownerName}} at {{selectedBook.ownerEmail}} to coordinate exchange.</p>
+    </b-modal>
+    <b-modal ref="unreserveModal" @ok="unreserveBook()">
+      <a> Cancel reservation of "{{selectedBook.title}}" by {{selectedBook.author}}?</a>
+    </b-modal>
   </div>
 </template>
 
@@ -180,6 +175,7 @@ export default {
                 .then(function() {
                     //self.transactionStatus[key] = 'pending';
                     //self.$set(self.transactionStatus,book.key,'pending');
+                    self.showModal(book,'pendingModal');
                     console.log("Reservation successfully updated!");
                 })
                 .catch(function(error) {

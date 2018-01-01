@@ -89,6 +89,10 @@ a {
  .modal {
      text-align: center;
  }
+
+  .modal .modal-body {
+     text-align: left;
+ }
  .modal-dialog {
      display: inline-block;
  }

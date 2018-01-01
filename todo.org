@@ -30,10 +30,17 @@ Library:
 ** show books borrowed by others
 ** highlight background of books past due
 ** DONE Make all db updates realtime
-** Hide/Unhide book from Library (eye icon)
-** Ability to extend return by date
+** DONE Hide/Unhide book from Library (eye icon)
+** DONE Ability to extend return by date
 ** DONE Add type of book, and description and link
 ** DONE add support for formatted description
 ** history of book transactions
 ** validation: dates picked, email,
+*** validation: https://vuejs.org/v2/examples/firebase.html
 ** send email notification when request
+** DONE clean up all modal messages
+** optmize by loading only used bootstrap components
+** tooltip hangs sometimes
+** check bottom border of dropdown in profile->lend
+** all account email to be overridden by user in his profile
+** Allow read anonymously except for owner IDs and email info

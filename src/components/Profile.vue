@@ -124,12 +124,10 @@
 	  <a>Loading...</a>
 	</div>
   	<b-modal v-if="myBooks.length" ref="hideBookModal" @ok="toggleBookVisibility()">
-  	  <a>Are you sure you want to {{selectedBook.hide?'show in':'hide from'}} Library:
-            {{selectedBook.title}}</a>
+  	  <a>Are you sure you want to {{selectedBook.hide?'show in':'hide from'}} Library:"{{selectedBook.title}}"</a>
   	</b-modal>
   	<b-modal v-if="myBooks.length" ref="deleteModal" @ok="removeBook()">
-  	  <a>Are you sure you want to delete:
-            {{selectedBook.title}}</a>
+  	  <a>Are you sure you want to delete:"{{selectedBook.title}}"</a>
   	</b-modal>
   	<b-modal ref="returnModal" @ok="returnBook()">
   	  <a>Make "{{selectedBook.title}}" available for reservation?</a>
@@ -285,6 +283,7 @@ export default {
             Object.assign(newBook,this.newBook);
             newBook.ownerID = this.rootData.uid;
             newBook.ownerName = this.rootData.name;
+            newBook.ownerEmail = this.rootData.email;
 	    // Add to reactive array
 	    this.myBooks.push(newBook);
 	    this.toggleCollapse(mid);
@@ -422,6 +421,7 @@ function createNewBook(){
             link: '',
             ownerID: '',
             ownerName: '',
+            ownerEmail: '',
             borrowerID:'',
             borrowerName:'',
             dueDate: '',

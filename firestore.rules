@@ -15,7 +15,9 @@ service cloud.firestore {
         allow update, delete: if request.auth.uid == resource.data.borrowerID
               || request.auth.uid == resource.data.ownerID;
     }
-    //TODO: Allow read anonymously except for owner IDs and email info
-
+    
+    match /users/{userID} {
+        allow read, update: if request.auth.uid == userID;
+    }
   }
 }

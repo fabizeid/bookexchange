@@ -80,6 +80,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         let isAnonymous = user.isAnonymous;
         componentData.rootData.uid = user.uid;
         componentData.rootData.name = user.displayName;
+        componentData.rootData.email = user.email;
         let providerData = user.providerData;
 	componentData.signInMessage = displayName;
 	componentData.signedIn = true;
@@ -91,6 +92,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 	componentData.rootData.signedIn = false;	
 	componentData.rootData.uid = null;
         componentData.rootData.name = '';
+        componentData.rootData.email= '';
 	console.log(" state changed signed out");
     }
 });

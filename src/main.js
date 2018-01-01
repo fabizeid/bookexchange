@@ -3,12 +3,9 @@
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import App from './App'
-//import Vtabl from '@/components/Vtabl'
 
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-//import 'bootstrap/dist/css/bootstrap.css'
 import '../scss/custom.scss'
-
 import Icon from 'vue-awesome/components/Icon'
 Vue.component('icon', Icon)
 // import VueFire from 'vuefire'
