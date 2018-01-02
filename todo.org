@@ -45,6 +45,6 @@ Library:
 ** check bottom border of dropdown in profile->lend
 ** all account email to be overridden by user in his profile
 *** Maybe not yet: make users have their google address
-** Allow read anonymously except for owner IDs and email info
+** DONE Allow read anonymously except for owner IDs and email info
 ** Possibly tabify Owned,borrowed, and pending tables
-** delete related transactions when book deleted
+** DONE delete related transactions when book deleted

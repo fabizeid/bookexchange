@@ -316,16 +316,28 @@ export default {
 	removeBook: function () {
             let book = this.selectedBook;
 	    let db = this.rootData.firebase.firestore();
+            let batch = db.batch();
 	    let key = book.key;
             let bid = indexForKey (this.myBooks, key);
-	    //remove from reactive variable
-	    this.myBooks.splice(bid,1);
+            let borrowReqsForCurrentBook = this.transactions[key];
+            self = this;
 	    //remove from DB
-	    db.collection("books").doc(key).delete().then(function() {
-		console.log("Document successfully deleted!");
-	    }).catch(function(error) {
-		console.error("Error removing document: ", error);
-	    });
+            batch.delete(db.collection("books").doc(key));
+            if (self.hasBorrowRequest(book)){
+                for(let i=0;i< borrowReqsForCurrentBook.length;i++)
+                {
+                    batch.delete(db.collection("transaction")
+                                 .doc(borrowReqsForCurrentBook[i].transID));
+                }
+                self.transactions[key] = [];
+            }
+            batch.commit().then(function() {
+                //remove from reactive variable
+                self.myBooks.splice(bid,1);
+                console.log("book successfully deleted!");
+            }).catch(function(error) {
+                console.error("Error deleting book/trans: ", error);
+            });
 	},
         hasBorrowRequest: function(book){
             return this.transactions.hasOwnProperty(book.key) &&
