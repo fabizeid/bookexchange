@@ -4,6 +4,7 @@ import Landing from '@/components/Landing'
 import Library from '@/components/Library'
 import Profile from '@/components/Profile'
 import Book from '@/components/Book'
+import User from '@/components/User'
 Vue.use(Router)
 
 export default new Router({
@@ -27,7 +28,11 @@ export default new Router({
       path: '/book/:id',
       name: 'book',
       component: Book
-    }
-      
+    },
+      {
+      path: '/user/:id',
+      name: 'user',
+      component: User
+    }      
   ]
 })
