@@ -93,7 +93,9 @@
 		    <span v-if="book.genre"><br><small><strong>Genre: </strong>{{book.genre}}</small></span>
 		    <br><small><strong>Added on: </strong>{{book.createdDate}}</small>
 		    <br><small v-if="rootData.signedIn"><strong>Added by: </strong>
-                      <a v-b-tooltip.hover :title="book.ownerEmail" href="#" @click.prevent>{{book.ownerName}}</a></small>
+                      <router-link :to="{ name: 'user', params: { id: book.ownerID }}" @click.prevent>{{book.ownerName}}</router-link>
+                      <!-- <a v-b-tooltip.hover :title="book.ownerEmail" href="#/user/book.ownerID" @click.prevent>{{book.ownerName}}</a> -->
+                    </small>
 	      	  </div> <!-- b-collapse -->
 		</td>
 	      </tr>

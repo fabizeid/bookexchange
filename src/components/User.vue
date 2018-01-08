@@ -42,8 +42,9 @@
 <script>
 
 let reactiveData = {};
-let nonreactiveData = {};
-let unsubscribe = null;
+let nonreactiveData = {unsubscribe: null,
+                      userID: null};
+
 export default {
     name: 'User',
     data () {
@@ -80,13 +81,12 @@ export default {
 	    if(signedIn) {
 		// User is signed in.
                 reset();
-                if(!unsubscribe) unsubscribe =
-		    loadDb(this);
+		loadDb(this);
 	    } else {
                 // User is signed out.
-		if (unsubscribe) {
-		    //unsubscribe[0]();unsubscribe[1]();
-		    unsubscribe = null
+		if (this.unsubscribe) {
+		    this.unsubscribe();
+		    this.unsubscribe = null
 		}
 		/*if (this.$router.currentRoute.name == 'profile')
 		    this.$router.go(-1); //go back to previous page*/
@@ -99,18 +99,32 @@ export default {
             this.$nextTick(function () {
                 chatBody.scrollTop = chatBody.scrollHeight;
             })
-        }
+        },
+        '$route' (to, from) {
+            // react to route changes...
+            if ((to.name == "user") &&
+                (this.userID != to.params.id)){                
+                this.userID = to.params.id;
+                if (this.unsubscribe) {
+	            this.unsubscribe();
+	            this.unsubscribe = null;
+	        }
+                reset();
+                if (this.rootData.signedIn)
+	            loadDb(this);
 
+            }
+        }            
     },
     created: function(){
 	console.log("User created");
         //Set non reactive Data
         Object.assign(this, nonreactiveData);
-
+        this.userID = this.$route.params.id;
 	/*will only be called once when created, for subsequent
          signins we use the watch*/
 	if (this.rootData.signedIn)
-	    unsubscribe = loadDb(this);
+	    loadDb(this);
     }
 }
 function reset(){
@@ -126,18 +140,27 @@ function loadDb (vm) {
     let fromID = vm.rootData.uid;
     let toID = vm.$route.params.id;
     let sentMsgs = [];
-    let mergedMsgs = [];
+    
+
     db.collection("users").doc(fromID)
         .collection("chatrooms").doc(toID)
         .collection("messages").orderBy("createdTime")
      	.get()
      	.then(function(querySnapshot) {
 	    sentMsgs = querySnapshot.docs;
+            if(vm.unsubscribe) console.error("subscription expected to be null")
+            vm.unsubscribe = loadInMessages(vm,sentMsgs); 
      	})
      	.catch(function(error) {
             console.error("Error getting out messages: ", error);
      	});
+}
 
+function loadInMessages(vm,sentMsgs){
+    let db = vm.rootData.firebase.firestore();
+    let fromID = vm.rootData.uid;
+    let toID = vm.$route.params.id;
+    let mergedMsgs = [];
     let firstSnapshot = true;
     let unsubscribe = db.collection("users").doc(fromID)
         .collection("chatrooms").doc(toID)
