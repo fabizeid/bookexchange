@@ -162,8 +162,8 @@ function loadInMessages(vm,sentMsgs){
     let toID = vm.$route.params.id;
     let mergedMsgs = [];
     let firstSnapshot = true;
-    let unsubscribe = db.collection("users").doc(fromID)
-        .collection("chatrooms").doc(toID)
+    let unsubscribe = db.collection("users").doc(toID)
+        .collection("chatrooms").doc(fromID)
         .collection("messages").orderBy("createdTime")
      	.onSnapshot(function(querySnapshot) {
             let dtr = {};
