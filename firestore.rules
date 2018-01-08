@@ -18,6 +18,12 @@ service cloud.firestore {
 
     match /users/{userID} {
         allow read, update: if request.auth.uid == userID;
+        match /chatrooms/{roomID}{
+        	allow read,write: if request.auth.uid != userID;
+          match /messages/{msgID}{
+          	allow read,write: if request.auth.uid != userID;
+          }
+        }
     }
     match /publicBooks/{currentBook} {
         allow read: if true;
