@@ -9,10 +9,7 @@
         <!-- <b-col> -->
         <div class="pane-chat" tabindex="0">
           <!-- <div class="pane-chat-tile"/> -->
-          <div class="pane-chat-body">
-            <div class="msg msg-sys">
-              <a>Today</a>
-            </div>
+          <div id="pane-chat-body" class="pane-chat-body">
             <div v-for="mess in messages"
                  :class="['msg',
                          {'msg-out':mess.out},
@@ -20,9 +17,7 @@
                          {'msg-sys':mess.sys},
                          {'tail': mess.tail} ]">
               <a>{{mess.text}}</a>
-              <a>{{mess.createdTime
-                .toLocaleTimeString()
-                .replace(/:.. /,' ')}}</a>
+              <a v-if="!mess.sys">{{mess.time}}</a>
             </div>
           </div>
 
@@ -62,25 +57,22 @@ export default {
 	    console.log(m);
 	},
         newMsg(el){
-            let chatBody =
-                el.parentElement.parentElement.querySelector(".pane-chat-body");
+            // let chatBody =
+            //     el.parentElement.parentElement.querySelector(".pane-chat-body");
             let fromID = this.rootData.uid;
             let toID = this.$route.params.id;
             let fs = this.rootData.firebase.firestore;
             let tail = true;
-            //addMsg(fs,fromID,toID,this.text);
+            addMsg(fs,fromID,toID,this.text);
             if(this.messages.length > 0 &&
-               this.messages[this.messages.length-1].hasOwnProperty("out")){ 
+               this.messages[this.messages.length-1].hasOwnProperty("out")){
                 tail = false;
             }
-            this.messages.push({text:this.text,
-                                out: true,
-                                tail: tail,
-                               createdTime: new Date()});
+            let dt = {text:this.text,
+                      createdTime: new Date()};
+            pushNewMsg(this.messages,dt,true);
             this.text='';
-            this.$nextTick(function () {
-                chatBody.scrollTop = chatBody.scrollHeight;
-            })
+        
         }
     },
     watch: {
@@ -101,7 +93,13 @@ export default {
                 reset();
 	    }
 	    console.log(" Profile signed in status "+ signedIn);
-	}
+	},
+        messages: function(){
+            let chatBody = document.getElementById("pane-chat-body");
+            this.$nextTick(function () {
+                chatBody.scrollTop = chatBody.scrollHeight;
+            })
+        }
 
     },
     created: function(){
@@ -137,68 +135,96 @@ function loadDb (vm) {
 	    sentMsgs = querySnapshot.docs;
      	})
      	.catch(function(error) {
-            console.error("Error getting sent messages: ", error);
+            console.error("Error getting out messages: ", error);
      	});
 
-
-    db.collection("users").doc(fromID)
+    let firstSnapshot = true;
+    let unsubscribe = db.collection("users").doc(fromID)
         .collection("chatrooms").doc(toID)
         .collection("messages").orderBy("createdTime")
-     	.get()
-     	.then(function(querySnapshot) {
+     	.onSnapshot(function(querySnapshot) {
             let dtr = {};
             let dts = {};
             let sentMsgsIdx = 0;
-            let isLastMsgOut = true;
-	    querySnapshot.forEach(function(doc) {
-                dtr = doc.data();
+            if (firstSnapshot) {
+	        querySnapshot.docChanges.forEach(function(change) {
+                    if (change.type != "added")
+                        console.error("change type not expected"); 
+                    dtr = change.doc.data();
+                    for( ;sentMsgsIdx < sentMsgs.length;sentMsgsIdx++){
+                        dts = sentMsgs[sentMsgsIdx].data();
+                        if(dts.createdTime < dtr.createdTime){
+                            pushNewMsg(mergedMsgs,dts,true);
+                        } else {
+                            break;
+                        }
+                    }
+                    pushNewMsg(mergedMsgs,dtr,false);
+                })
+                //merge remaining dts
                 for( ;sentMsgsIdx < sentMsgs.length;sentMsgsIdx++){
                     dts = sentMsgs[sentMsgsIdx].data();
-                    if(dts.createdTime < dtr.createdTime){
-                        
-                        if(!isLastMsgOut) {
-                            dts.tail = true;
-                            isLastMsgOut = true;
+                    pushNewMsg(mergedMsgs,dts,true);
+                }
+                vm.messages = mergedMsgs;
+                firstSnapshot = false;
+            } else {
+                querySnapshot.docChanges.forEach(function(change) {
+                    if (change.type === "added"){
+                        dtr = change.doc.data();
+                        if(!dtr.createdTime){
+                            //date is from local cache no server timestamp yet,
+                            //create a temporary one, 
+                            dtr.createdTime = new Date();
                         }
-                        dts.out = true;
-                        /*dts.Time =
-                            dts.createdTime
-                            .toLocaleTimeString()
-                            .replace(/:.. /,' ');*/
-                        mergedMsgs.push(dts);
-                    } else {
-                        break;
+                        pushNewMsg(vm.messages,dtr,false);
                     }
-                }
-                if(isLastMsgOut){
-                    dtr.tail = true;
-                    isLastMsgOut = false;
-                }
-                dtr.in = true;
-                mergedMsgs.push(dtr);
-            })
-            //merge remaining dts
-            for( ;sentMsgsIdx < sentMsgs.length;sentMsgsIdx++){
-                dts = sentMsgs[sentMsgsIdx].data();
-                if(!isLastMsgOut) {
-                    dts.tail = true;
-                    isLastMsgOut = true;
-                }
-                dts.out = true;
-                mergedMsgs.push(dts);
+                })
             }
-            if(mergedMsgs.length > 0)
-                mergedMsgs[0].tail = true;
-            vm.messages = mergedMsgs;
      	})
-     	.catch(function(error) {
-            console.error("Error getting sent messages: ", error);
-     	});
-
-    return null;
+     	          
+    return unsubscribe;
 }
 
+function pushNewMsg(messages,dt,isOut){
+    let tail = true;
+    if(isOut) {
+        dt.out = true;
+    } else {
+        dt.in = true;
+    }
 
+    //Do we need a tail
+    if ((messages.length > 0) &&
+        ((dt.out && messages[messages.length-1].hasOwnProperty("out")) ||
+         (dt.in && messages[messages.length-1].hasOwnProperty("in"))))
+    {
+        tail = false;
+    }
+    dt.tail = tail;
+    
+    //Parse time
+    dt.time =
+        dt.createdTime
+        .toLocaleTimeString()
+        .replace(/:.. /,' ');
+
+    //Do we need to add a Date
+    let dtDate = dt.createdTime.toLocaleDateString();
+    if ((messages.length == 0) ||
+        (dtDate != messages[messages.length-1]
+         .createdTime.toLocaleDateString()))
+    {
+        if (dtDate == new Date().toLocaleDateString())
+            dtDate = "Today";
+        
+        let sysDt = { sys: true,
+                      text: dtDate};
+        messages.push(sysDt);
+    }
+
+    messages.push(dt);
+}
 function addMsg(fs,fromID,toID,msgtxt){
     let db = fs();
     let msg = {
