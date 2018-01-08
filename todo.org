@@ -48,3 +48,6 @@ Library:
 ** DONE Allow read anonymously except for owner IDs and email info
 ** Possibly tabify Owned,borrowed, and pending tables
 ** DONE delete related transactions when book deleted
+User:
+*make sure we can only talk to available users
+*message notification
