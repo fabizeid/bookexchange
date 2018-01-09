@@ -10,6 +10,7 @@
         <div class="pane-chat" tabindex="0">
           <!-- <div class="pane-chat-tile"/> -->
           <div id="pane-chat-body" class="pane-chat-body">
+            <div style="height: 100%;"/>
             <div v-for="mess in messages"
                  :class="['msg',
                          {'msg-out':mess.out},
