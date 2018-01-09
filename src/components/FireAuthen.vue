@@ -1,14 +1,14 @@
 <template>
-  <b-button size="sm" v-on:click="toggleSignIn()">
+  <b-nav-item v-b-toggle="'nav_collapse'"class="ml-md-auto" v-on:click="toggleSignIn()">
     <icon v-bind:name = "signedIn? 'sign-in': 'sign-out'" aria-hidden="true"></icon><a class="align-middle">{{signInMessage}}</a>
-  </b-button>
+  </b-nav-item>
 </template>
 
 <script>
 
 import 'vue-awesome/icons/sign-in'
 import 'vue-awesome/icons/sign-out'
-  
+
 // Initialize Firebase
 var config = {
     apiKey: "AIzaSyAVZsubeql5nwSz5vq4CkqUcrT0FOXN-YY",
@@ -28,7 +28,7 @@ var componentData = {
     signedIn: false
 };
 
-export default {  
+export default {
   name: 'FireAuthen',
     data () {
 	componentData.rootData = this.$root.$data;
@@ -43,15 +43,13 @@ export default {
 	   if (!firebase.auth().currentUser) {
 	       /*Sign in*/
 	       let provider = new firebase.auth.GoogleAuthProvider();
-	       firebase.auth().signInWithPopup(provider).then(function(result) {		   
-		   console.log("sign in: ", result);
+	       firebase.auth().signInWithPopup(provider).then(function(result) {
 	       }).catch(function(error) {
 		   console.error("Error sign in: ", error);
-	       }); 
+	       });
 	   } else {
 	       /*Sign Out*/
 	       firebase.auth().signOut().then(function() {
-		   console.log("signed out");
 	       }).catch(function(error) {
 		   console.error("Error sign out: ", error);
 	       });
@@ -61,7 +59,7 @@ export default {
 }
 
 
-/*consider init app in window.onload if will be manipulating DOM 
+/*consider init app in window.onload if will be manipulating DOM
  see: https://stackoverflow.com/questions/20180251/when-to-use-window-onload
  window.onload = function() {
       initApp();
@@ -73,7 +71,7 @@ export default {
 firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
         // User is signed in.
-        let displayName = user.displayName.split(" ", 1)[0];	
+        let displayName = user.displayName.split(" ", 1)[0];
         let email = user.email;
         let emailVerified = user.emailVerified;
         let photoURL = user.photoURL;
@@ -84,12 +82,12 @@ firebase.auth().onAuthStateChanged(function(user) {
         let providerData = user.providerData;
 	componentData.signInMessage = displayName;
 	componentData.signedIn = true;
-	componentData.rootData.signedIn = true;		
+	componentData.rootData.signedIn = true;
 	console.log(" state changed signed in");
     } else {
 	componentData.signInMessage = 'Login';
 	componentData.signedIn = false;
-	componentData.rootData.signedIn = false;	
+	componentData.rootData.signedIn = false;
 	componentData.rootData.uid = null;
         componentData.rootData.name = '';
         componentData.rootData.email= '';

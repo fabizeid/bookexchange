@@ -24,7 +24,7 @@
 
           <footer  class="pane-footer">
             <!-- @keydown.enter.native="newMsg($event.target)" -->
-            <b-form-textarea
+            <b-form-textarea v-if="rootData.signedIn"
                v-model="text"
                :no-resize="true"
                placeholder="Enter something"

@@ -17,8 +17,8 @@
 	  <transition name="fade">
 	    <b-nav-item  v-if="rootData.signedIn" to="/profile" exact>Profile</b-nav-item>
 	  </transition>
+          <LoginButton></LoginButton>
 	</b-nav>
-	<LoginButton class="ml-sm-auto mt-sm-2-down"></LoginButton>
       </b-collapse>
     </b-navbar>
     <div class="my-4 pb-3"/>
@@ -51,6 +51,9 @@ export default {
     filter: invert(.8);
 }
 
+.navbar-nav{
+    width: 100%;
+}
 @media (max-width: 767px) {
     .mt-sm-2-down {
 	margin-top: 0.5rem !important;
