@@ -20,6 +20,7 @@ service cloud.firestore {
         allow read, update: if request.auth.uid == userID;
         match /chatrooms/{userInID}{
         	allow read,write: if request.auth.uid == userID;
+                allow create,update: if request.auth.uid == userInID;
           match /messages/{msgID}{
           	allow read: if request.auth.uid == userID ||
                       request.auth.uid == userInID;

@@ -74,7 +74,7 @@ export default {
                       createdTime: new Date()};
             pushNewMsg(this.messages,dt,true);
             this.text='';
-        
+
         }
     },
     watch: {
@@ -104,7 +104,7 @@ export default {
         '$route' (to, from) {
             // react to route changes...
             if ((to.name == "user") &&
-                (this.userID != to.params.id)){                
+                (this.userID != to.params.id)){
                 this.userID = to.params.id;
                 if (this.unsubscribe) {
 	            this.unsubscribe();
@@ -115,7 +115,7 @@ export default {
 	            loadDb(this);
 
             }
-        }            
+        }
     },
     created: function(){
 	console.log("User created");
@@ -141,7 +141,7 @@ function loadDb (vm) {
     let fromID = vm.rootData.uid;
     let toID = vm.$route.params.id;
     let sentMsgs = [];
-    
+
 
     db.collection("users").doc(fromID)
         .collection("chatrooms").doc(toID)
@@ -150,7 +150,7 @@ function loadDb (vm) {
      	.then(function(querySnapshot) {
 	    sentMsgs = querySnapshot.docs;
             if(vm.unsubscribe) console.error("subscription expected to be null")
-            vm.unsubscribe = loadInMessages(vm,sentMsgs); 
+            vm.unsubscribe = loadInMessages(vm,sentMsgs);
      	})
      	.catch(function(error) {
             console.error("Error getting out messages: ", error);
@@ -173,7 +173,7 @@ function loadInMessages(vm,sentMsgs){
             if (firstSnapshot) {
 	        querySnapshot.docChanges.forEach(function(change) {
                     if (change.type != "added")
-                        console.error("change type not expected"); 
+                        console.error("change type not expected");
                     dtr = change.doc.data();
                     for( ;sentMsgsIdx < sentMsgs.length;sentMsgsIdx++){
                         dts = sentMsgs[sentMsgsIdx].data();
@@ -198,7 +198,7 @@ function loadInMessages(vm,sentMsgs){
                         dtr = change.doc.data();
                         if(!dtr.createdTime){
                             //date is from local cache no server timestamp yet,
-                            //create a temporary one, 
+                            //create a temporary one,
                             dtr.createdTime = new Date();
                         }
                         pushNewMsg(vm.messages,dtr,false);
@@ -206,7 +206,7 @@ function loadInMessages(vm,sentMsgs){
                 })
             }
      	})
-     	          
+
     return unsubscribe;
 }
 
@@ -226,7 +226,7 @@ function pushNewMsg(messages,dt,isOut){
         tail = false;
     }
     dt.tail = tail;
-    
+
     //Parse time
     dt.time =
         dt.createdTime
@@ -241,7 +241,7 @@ function pushNewMsg(messages,dt,isOut){
     {
         if (dtDate == new Date().toLocaleDateString())
             dtDate = "Today";
-        
+
         let sysDt = { sys: true,
                       text: dtDate};
         messages.push(sysDt);
@@ -251,19 +251,32 @@ function pushNewMsg(messages,dt,isOut){
 }
 function addMsg(fs,fromID,toID,msgtxt){
     let db = fs();
+    let batch = db.batch();
     let msg = {
         text: msgtxt,
         createdTime: fs.FieldValue.serverTimestamp()
     }
+    let lastUpdate = {lastUpdateTime: fs.FieldValue.serverTimestamp()};
     // Add to DB
-    db.collection("users").doc(fromID)
+    let newMsgRef = db.collection("users").doc(fromID)
         .collection("chatrooms").doc(toID)
-        .collection("messages").add(msg)
-	.then(function(docRef) {
-	    console.log("Document written with ID: ", docRef.id);
+        .collection("messages").doc();
+    batch.set(newMsgRef,msg);
+
+    let notifyToRef = db.collection("users").doc(toID)
+        .collection("chatrooms").doc(fromID);
+    batch.set(notifyToRef,lastUpdate);
+
+    let notifySelfRef = db.collection("users").doc(fromID)
+        .collection("chatrooms").doc(toID);
+    batch.set(notifySelfRef,lastUpdate);
+
+    batch.commit()
+	.then(function() {
+	    console.log("Added message");
 	})
 	.catch(function(error) {
-	    console.error("Error adding document: ", error);
+	    console.error("Error adding message: ", error);
 	});
 
 }
