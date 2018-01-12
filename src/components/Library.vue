@@ -327,11 +327,11 @@ function loadDb (vm) {
     let uid = vm.rootData.uid;
     let setReactive = vm.$set;//vue set api
     let signedIn = vm.rootData.signedIn;
-    let unscubscribeCbs = [];
+    let unsubscribeCbs = [];
     let bookCollection = "publicBooks"
     reset();
     if (signedIn) {
-    let unscubscribeTrans = db.collection("transaction").where("borrowerID", "==", uid)
+    let unsubscribeTrans = db.collection("transaction").where("borrowerID", "==", uid)
 	.onSnapshot(function(snapshot) {
             snapshot.docChanges.forEach(function(change) {
 		let dt = change.doc.data();
@@ -361,10 +361,10 @@ function loadDb (vm) {
             });
 
 	});
-        unscubscribeCbs.push(unscubscribeTrans);
+        unsubscribeCbs.push(unsubscribeTrans);
         bookCollection = "books";
     }
-    let unscubscribeBooks =  db.collection(bookCollection)
+    let unsubscribeBooks =  db.collection(bookCollection)
         .where("hide", "==", false)
 	.onSnapshot(function(snapshot) {
             if(nonreactiveData.switchedLoginStatus){
@@ -397,8 +397,8 @@ function loadDb (vm) {
             });
 	    reactiveData.loading = false;
 	});
-    unscubscribeCbs.push(unscubscribeBooks);
-    return unscubscribeCbs;
+    unsubscribeCbs.push(unsubscribeBooks);
+    return unsubscribeCbs;
 }
 
 //helper function which will be called manually to batch updateDB

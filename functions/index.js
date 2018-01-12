@@ -126,3 +126,19 @@ exports.deleteBook = functions.firestore
         let db = admin.firestore();
         return db.collection("publicBooks").doc(bookId).delete();
     });
+
+/*
+createChatroom({title: 'foo@'},{params: {userId: 'Kxfns4MCMChr8UIOx6QLoQIU7RN2',roomId: 'Kxfns4MCMChr8UIOx6QLoQIU7RN2'}})
+*/
+
+exports.createChatroom = functions.firestore
+  .document('users/{userId}/chatrooms/{roomId}')
+    .onCreate(event => {
+        let roomId = event.params.roomId;
+        let db = admin.firestore();
+        return db.collection("users").doc(roomId).get()
+            .then(function(doc){
+                let dt = doc.data();
+                event.data.ref.update(dt);
+            });
+    });

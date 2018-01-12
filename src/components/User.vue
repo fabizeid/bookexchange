@@ -43,7 +43,8 @@
 <script>
 
 let reactiveData = {};
-let nonreactiveData = {unsubscribe: null,
+let nonreactiveData = {unsubscribeMsgCb: null,
+                       unsubscribeNotifCb: null,
                       userID: null};
 
 export default {
@@ -85,9 +86,13 @@ export default {
 		loadDb(this);
 	    } else {
                 // User is signed out.
-		if (this.unsubscribe) {
-		    this.unsubscribe();
-		    this.unsubscribe = null
+		if (this.unsubscribeMsgCb) {
+		    this.unsubscribeMsgCb();
+		    this.unsubscribeMsgCb = null
+		}
+		if (this.unsubscribeNotifCb) {
+		    this.unsubscribeNotifCb();
+		    this.unsubscribeNotifCb = null
 		}
 		/*if (this.$router.currentRoute.name == 'profile')
 		    this.$router.go(-1); //go back to previous page*/
@@ -106,13 +111,13 @@ export default {
             if ((to.name == "user") &&
                 (this.userID != to.params.id)){
                 this.userID = to.params.id;
-                if (this.unsubscribe) {
-	            this.unsubscribe();
-	            this.unsubscribe = null;
+                if (this.unsubscribeMsgCb) {
+	            this.unsubscribeMsgCb();
+	            this.unsubscribeMsgCb = null;
 	        }
-                reset();
+                resetMsg();
                 if (this.rootData.signedIn)
-	            loadDb(this);
+	            loadMsgDb(this);
 
             }
         }
@@ -129,6 +134,18 @@ export default {
     }
 }
 function reset(){
+    resetMsg();
+    resetNotif();
+}
+
+function resetNotif(){
+    Object.assign(reactiveData,
+                  {
+                      notifications: []
+                  });
+}
+
+function resetMsg(){
     Object.assign(reactiveData,
                   {  text: '',
                      messages: []
@@ -137,6 +154,44 @@ function reset(){
 
 
 function loadDb (vm) {
+    loadNotifDb(vm);
+    loadMsgDb (vm);
+}
+
+function loadNotifDb (vm) {
+    let db = vm.rootData.firebase.firestore();
+    let fromID = vm.rootData.uid;
+    if(vm.unsubscribeNotifCb) console.error("subscription expected to be null")
+    vm.unsubscribeNotifCb = db.collection("users").doc(fromID)
+        .collection("chatrooms")
+     	.onSnapshot(function(querySnapshot) {
+            querySnapshot.docChanges.forEach(function(change) {
+                let dt = change.doc.data();
+		let key = change.doc.id;
+                if(!dt.lastUpdateTime) return; //skip if null
+                dt.key = key;
+		if (change.type === "added") {
+		    reactiveData.notifications.push(dt);
+                    console.log("added");console.log(dt)
+		} else {
+		    let index = indexForKey (reactiveData.notifications,key);
+		    if (change.type === "modified") {
+			/*Can't use indexing as Vue will not trigger*/
+
+			reactiveData.notifications.splice(index,1,dt);
+                        console.log("mod");console.log(dt)
+		    } else {
+			if (change.type === "removed") {
+			    reactiveData.notifications.splice(index,1 );
+			}
+		    }
+		}
+            });
+        });
+
+}
+
+function loadMsgDb (vm) {
     let db = vm.rootData.firebase.firestore();
     let fromID = vm.rootData.uid;
     let toID = vm.$route.params.id;
@@ -149,8 +204,8 @@ function loadDb (vm) {
      	.get()
      	.then(function(querySnapshot) {
 	    sentMsgs = querySnapshot.docs;
-            if(vm.unsubscribe) console.error("subscription expected to be null")
-            vm.unsubscribe = loadInMessages(vm,sentMsgs);
+            if(vm.unsubscribeMsgCb) console.error("subscription expected to be null")
+            vm.unsubscribeMsgCb = loadInMessages(vm,sentMsgs);
      	})
      	.catch(function(error) {
             console.error("Error getting out messages: ", error);
@@ -163,7 +218,7 @@ function loadInMessages(vm,sentMsgs){
     let toID = vm.$route.params.id;
     let mergedMsgs = [];
     let firstSnapshot = true;
-    let unsubscribe = db.collection("users").doc(toID)
+    let unsubscribeMsgCb = db.collection("users").doc(toID)
         .collection("chatrooms").doc(fromID)
         .collection("messages").orderBy("createdTime")
      	.onSnapshot(function(querySnapshot) {
@@ -207,7 +262,7 @@ function loadInMessages(vm,sentMsgs){
             }
      	})
 
-    return unsubscribe;
+    return unsubscribeMsgCb;
 }
 
 function pushNewMsg(messages,dt,isOut){
@@ -280,6 +335,17 @@ function addMsg(fs,fromID,toID,msgtxt){
 	});
 
 }
+function indexForKey (array, key, keyname) {
+    if(typeof keyname === "undefined") {
+        keyname = 'key';
+    }
+    for (let i = 0; i < array.length; i++) {
+    if (array[i][keyname] === key) {
+      return i
+    }
+  }
+}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
