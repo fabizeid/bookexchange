@@ -2,16 +2,6 @@
   <div class="user container">
     <b-row>
       <b-col>
-        <ul>
-          <li v-for="notif in sortedNotifications">
-            <!-- {{notif.key}}{{notif.name}}{{notif.email}}{{notif.lastUpdateTime}} -->
-            <router-link v-if="notif.key" :to="{ name: 'user', params: { id: notif.key }}" @click.prevent>{{notif.name}}</router-link>
-          </li>
-        </ul>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
         <!-- Check if signed in before showing  page -->
         <!-- User id: {{$route.params.id}} <br> -->
         <!-- URL: {{baseURL}}/#/user/{{$route.params.id}} -->
@@ -44,6 +34,16 @@
                ></b-form-textarea>
           </footer>
         </div>
+      </b-col>
+    </b-row>
+    <b-row class="mt-5">
+      <b-col class="mt-5">
+        <ul>
+          <li v-for="notif in sortedNotifications">
+            <!-- {{notif.key}}{{notif.name}}{{notif.email}}{{notif.lastUpdateTime}} -->
+            <router-link v-if="notif.key" :to="{ name: 'user', params: { id: notif.key }}" @click.prevent>{{notif.name}}</router-link>
+          </li>
+        </ul>
       </b-col>
     </b-row>
 
