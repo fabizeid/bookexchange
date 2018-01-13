@@ -341,12 +341,12 @@ function addMsg(fs,fromID,toID,msgtxt){
 
     let notifyToRef = db.collection("users").doc(toID)
         .collection("chatrooms").doc(fromID);
-    batch.set(notifyToRef,lastUpdate);
+    batch.set(notifyToRef,lastUpdate,{merge: true});
 
     if (toID != fromID){
         let notifySelfRef = db.collection("users").doc(fromID)
             .collection("chatrooms").doc(toID);
-        batch.set(notifySelfRef,lastUpdate);
+        batch.set(notifySelfRef,lastUpdate,{merge: true});
     }
 
     batch.commit()
