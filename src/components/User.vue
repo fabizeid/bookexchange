@@ -413,7 +413,6 @@ col {
     font-size: 13.6px;
     line-height: 19px;
     color: #262626;
-    //margin-bottom: 8px;
     margin-top: 2px;
     margin-left: 5%;
     margin-right: 5%;
@@ -433,7 +432,6 @@ col {
 
 .msg-in{
     background-color: #fff;
-    //    float: left;
     align-self: flex-start;
 }
 .msg-out{
