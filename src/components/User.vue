@@ -2,6 +2,16 @@
   <div class="user container">
     <b-row>
       <b-col>
+        <ul>
+          <li v-for="notif in sortedNotifications">
+            <!-- {{notif.key}}{{notif.name}}{{notif.email}}{{notif.lastUpdateTime}} -->
+            <router-link v-if="notif.key" :to="{ name: 'user', params: { id: notif.key }}" @click.prevent>{{notif.name}}</router-link>
+          </li>
+        </ul>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
         <!-- Check if signed in before showing  page -->
         <!-- User id: {{$route.params.id}} <br> -->
         <!-- URL: {{baseURL}}/#/user/{{$route.params.id}} -->
@@ -76,6 +86,13 @@ export default {
             pushNewMsg(this.messages,dt,true);
             this.text='';
 
+        }
+    },
+    computed: {
+        sortedNotifications(){
+	    let orderBy = require('lodash.orderby');
+            return orderBy(this.notifications,
+                            [notif => notif.lastUpdateTime],['desc']);
         }
     },
     watch: {
@@ -172,14 +189,15 @@ function loadNotifDb (vm) {
                 dt.key = key;
 		if (change.type === "added") {
 		    reactiveData.notifications.push(dt);
-                    console.log("added");console.log(dt)
 		} else {
 		    let index = indexForKey (reactiveData.notifications,key);
 		    if (change.type === "modified") {
-			/*Can't use indexing as Vue will not trigger*/
-
-			reactiveData.notifications.splice(index,1,dt);
-                        console.log("mod");console.log(dt)
+                        if (index === undefined){
+                            reactiveData.notifications.push(dt);
+                        } else {
+			    /*Can't use indexing as Vue will not trigger*/
+			    reactiveData.notifications.splice(index,1,dt);
+                        }
 		    } else {
 			if (change.type === "removed") {
 			    reactiveData.notifications.splice(index,1 );
@@ -294,9 +312,12 @@ function pushNewMsg(messages,dt,isOut){
         (dtDate != messages[messages.length-1]
          .createdTime.toLocaleDateString()))
     {
-        if (dtDate == new Date().toLocaleDateString())
+        let d = new Date();
+        if (dtDate == d.toLocaleDateString())
             dtDate = "Today";
-
+        else if (dtDate == d.setDate(d.getDate()-1).toLocaleDateString())
+            dtDate = "Yesterday";
+        
         let sysDt = { sys: true,
                       text: dtDate};
         messages.push(sysDt);
@@ -322,9 +343,11 @@ function addMsg(fs,fromID,toID,msgtxt){
         .collection("chatrooms").doc(fromID);
     batch.set(notifyToRef,lastUpdate);
 
-    let notifySelfRef = db.collection("users").doc(fromID)
-        .collection("chatrooms").doc(toID);
-    batch.set(notifySelfRef,lastUpdate);
+    if (toID != fromID){
+        let notifySelfRef = db.collection("users").doc(fromID)
+            .collection("chatrooms").doc(toID);
+        batch.set(notifySelfRef,lastUpdate);
+    }
 
     batch.commit()
 	.then(function() {
