@@ -313,10 +313,13 @@ function pushNewMsg(messages,dt,isOut){
         (dtDate != messages[messages.length-1]
          .createdTime.toLocaleDateString()))
     {
-        let d = new Date();
-        if (dtDate == d.toLocaleDateString())
+        let today = new Date();
+        let yesterday = new Date();
+        yesterday.setDate(today.getDate()-1);
+
+        if (dtDate == today.toLocaleDateString())
             dtDate = "Today";
-        else if (dtDate == d.setDate(d.getDate()-1).toLocaleDateString())
+        else if (dtDate == yesterday.toLocaleDateString())
             dtDate = "Yesterday";
 
         let sysDt = { sys: true,

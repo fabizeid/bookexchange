@@ -597,8 +597,9 @@ a:-webkit-any-link {
 @media (max-width: 767px) {
     .d-even-flex {
         display: flex;
-        justify-content: space-evenly;
-    }
+        -ms-flex-pack: distribute;
+        justify-content: space-around;
+  }
     .hide-md {
         display: none;
     }
