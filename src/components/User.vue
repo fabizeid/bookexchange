@@ -42,6 +42,7 @@
           <li v-for="notif in sortedNotifications">
             <!-- {{notif.key}}{{notif.name}}{{notif.email}}{{notif.lastUpdateTime}} -->
             <router-link v-if="notif.key" :to="{ name: 'user', params: { id: notif.key }}" @click.prevent>{{notif.name}}</router-link>
+            <a>Email: {{notif.email}}</a>
           </li>
         </ul>
       </b-col>
@@ -317,7 +318,7 @@ function pushNewMsg(messages,dt,isOut){
             dtDate = "Today";
         else if (dtDate == d.setDate(d.getDate()-1).toLocaleDateString())
             dtDate = "Yesterday";
-        
+
         let sysDt = { sys: true,
                       text: dtDate};
         messages.push(sysDt);

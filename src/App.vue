@@ -23,9 +23,9 @@
     </b-navbar>
     <div class="my-4 pb-3"/>
     <!-- keep-alive needed otherwise watch on rootdata.signedIn
-	 in Library.vue and Profile.vuewill not get triggered 
+	 in Library.vue and Profile.vuewill not get triggered
 	 when signing in or out from a different route-->
-    <keep-alive> 
+    <keep-alive>
       <router-view/>
     </keep-alive>
   </div>
@@ -54,10 +54,16 @@ export default {
 .navbar-nav{
     width: 100%;
 }
+
 @media (max-width: 767px) {
-    .mt-sm-2-down {
-	margin-top: 0.5rem !important;
-    }
+   .mt-sm-2-down {
+        margin-top: 0.5rem !important;
+   }
+
+   .nav-link {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+   }
 
 }
 

@@ -42,8 +42,23 @@
 	<table class="table">
 	  <tbody>
             <template v-for="(book, index) in myBooks"> <!-- :key="book.key" -->
+              <tr>
+                <td colspan="2">
+                  <div class="d-even-flex">
+                  <a v-if="book.borrowerID" href="#" @click.prevent= "showModal(book,'returnModal')">Return</a>
+                  <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'lendModal')">Lend</a>
+                    <a v-b-tooltip.hover :title="book.hide?'Show':'Hide'" href="#" @click.prevent="showModal(book,'hideBookModal')">
+		      <icon :name="book.hide?'eye-slash':'eye'"/></a>
+                    <a v-b-tooltip.hover title="Edit entry" href="#" @click.prevent="toggleEdit(index,false)">
+		      <icon name="pencil"/></a>
+		    <a v-b-tooltip.hover title="Delete entry" href="#" @click.prevent = "showModal(book,'deleteModal')">
+		      <icon name="trash"/></a>
+                    </div>
+                </td>
+              </tr>
+
 	      <tr>
-		<td>
+		<td style="border-top-width: 0; padding: 0;">
                   <div>
 		    <a class="booktitle myinput" data-f-field="title" :data-f-index="index">{{book.title}}</a>
                   </div>
@@ -54,11 +69,11 @@
                     <small ><strong class="text-nowrap">Borrowed by: </strong><a class="text-nowrap">{{book.borrowerName}}</a></small>
                   </div>
 		</td>
-		<td class="text-right">
+		<td class="text-right" style="border-top-width: 0; padding: 0;">
 		  <div>
 		    <small ><strong class="text-nowrap">Available: </strong>{{book.dueDate?book.dueDate:"now"}}</small>
 		  </div>
-		  <div>
+		  <div class="hide-md">
 		    <!-- stop.prevent added to avoid scrolling to top after collapsing -->
                     <a v-if="book.borrowerID" href="#" @click.prevent= "showModal(book,'returnModal')">Return</a>
                     <a v-else-if="hasBorrowRequest(book)" href="#" @click.prevent= "showModal(book,'lendModal')">Lend</a>
@@ -573,7 +588,23 @@ a:-webkit-any-link {
 }
 #lendModal .modal-title {
     max-width: 280px;
+}
+
+.d-even-flex {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .d-even-flex {
+        display: flex;
+        justify-content: space-evenly;
     }
+    .hide-md {
+        display: none;
+    }
+}
+
+
 </style>
 
 
