@@ -35,7 +35,7 @@ new Vue({
   el: '#app',
   /* template of parent*/
   /*template: '<Vtabl/>',*/
-    template: '<App/>',
+    template: '<App/>', //template of this component is the tag App which itself is defined by the component App
   /*component available in parent template*/
  // components: { Vtabl }
     components: { App },

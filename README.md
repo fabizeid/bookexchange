@@ -5,6 +5,11 @@
 ## Build Setup
 
 ``` bash
+
+#clone repo
+cd directory
+git clone https://github.com/fabizeid/bookexchange.git 
+
 # install dependencies
 npm install
 
@@ -42,5 +47,5 @@ firebase deploy --only functions:function1,functions:function2
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
-M-x magit-status to start magit then ? for all commands, s for staging and c for commiting:
+M-x magit-status to start magit then ? for all commands, s for staging and c for commiting C-c C-c after commit message:
 https://www.emacswiki.org/emacs/Magit
