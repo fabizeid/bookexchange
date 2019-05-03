@@ -12,7 +12,7 @@
 	  <!-- <a>{{data.field.label}}</a> -->
 	  <!-- size="sm" class="mh-100" float-right -->
 	  <b-dropdown   id="ddown1" text="Filter" >
-	      <b-form-checkbox v-model="allSelected"
+	    <b-form-checkbox v-model="allSelected"
 	  		       :indeterminate="indeterminate"
 	  		       aria-describedby="genres"
 	  		       aria-controls="genres"
@@ -333,7 +333,7 @@ function loadDb (vm) {
     if (signedIn) {
     let unsubscribeTrans = db.collection("transaction").where("borrowerID", "==", uid)
 	.onSnapshot(function(snapshot) {
-            snapshot.docChanges.forEach(function(change) {
+            snapshot.docChanges().forEach(function(change) {
 		let dt = change.doc.data();
 		if (change.type === "added") {
 		    //it shouldn't happen but in case there several
@@ -372,7 +372,7 @@ function loadDb (vm) {
                 reactiveData.booksFB = [];
                 nonreactiveData.switchedLoginStatus = false;
             };
-            snapshot.docChanges.forEach(function(change) {
+            snapshot.docChanges().forEach(function(change) {
 		let dt = change.doc.data();
 		let key = change.doc.id;
 		dt.key = key;

@@ -10,8 +10,13 @@
 cd directory
 git clone https://github.com/fabizeid/bookexchange.git 
 
+sudo npm install -g firebase-tools
+
 # install dependencies
 npm install
+
+#if node-saas/vendor does not exist (bug)
+npm rebuild node-sass
 
 # serve with hot reload at localhost:8080
 npm run dev

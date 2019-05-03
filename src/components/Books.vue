@@ -32,8 +32,9 @@ const firebase = require("firebase");
 // Required for side-effects
 require("firebase/firestore");
 firebase.initializeApp(config);
-var db = firebase.firestore();
-
+const db = firebase.firestore();
+const settings = {timestampsInSnapshots: true};
+db.settings(settings);
 var componentData = {
 	  booksFB: []
     };
@@ -82,7 +83,7 @@ export default {
 //Can't use maps with id here since map changes are not observable (not triggered with v-for)
 db.collection("books")
     .onSnapshot(function(snapshot) {
-        snapshot.docChanges.forEach(function(change) {
+        snapshot.docChanges().forEach(function(change) {
 	    let dt = change.doc.data();
 	    let key = change.doc.id;
 

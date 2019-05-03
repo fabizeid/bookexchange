@@ -16,12 +16,14 @@ var config = {
     projectId: "bookexchange-beirut"
 };
 
-const firebase = require("firebase");
+const firebase = require("firebase/app");
 // Required for side-effects
 require("firebase/firestore");
 require("firebase/auth");
 firebase.initializeApp(config);
-
+const firestore = firebase.firestore();
+const settings = {timestampsInSnapshots: true};
+firestore.settings(settings);
 
 var componentData = {
     signInMessage: 'Login',

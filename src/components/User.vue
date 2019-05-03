@@ -93,7 +93,7 @@ export default {
         sortedNotifications(){
 	    let orderBy = require('lodash.orderby');
             return orderBy(this.notifications,
-                            [notif => notif.lastUpdateTime],['desc']);
+                            [notif => notif.lastUpdateTime.toDate()],['desc']);
         }
     },
     watch: {
@@ -183,7 +183,7 @@ function loadNotifDb (vm) {
     vm.unsubscribeNotifCb = db.collection("users").doc(fromID)
         .collection("chatrooms")
      	.onSnapshot(function(querySnapshot) {
-            querySnapshot.docChanges.forEach(function(change) {
+            querySnapshot.docChanges().forEach(function(change) {
                 let dt = change.doc.data();
 		let key = change.doc.id;
                 if(!dt.lastUpdateTime) return; //skip if null
@@ -245,7 +245,7 @@ function loadInMessages(vm,sentMsgs){
             let dts = {};
             let sentMsgsIdx = 0;
             if (firstSnapshot) {
-	        querySnapshot.docChanges.forEach(function(change) {
+	        querySnapshot.docChanges().forEach(function(change) {
                     if (change.type != "added")
                         console.error("change type not expected");
                     dtr = change.doc.data();
@@ -267,7 +267,7 @@ function loadInMessages(vm,sentMsgs){
                 vm.messages = mergedMsgs;
                 firstSnapshot = false;
             } else {
-                querySnapshot.docChanges.forEach(function(change) {
+                querySnapshot.docChanges().forEach(function(change) {
                     if (change.type === "added"){
                         dtr = change.doc.data();
                         if(!dtr.createdTime){
@@ -303,15 +303,15 @@ function pushNewMsg(messages,dt,isOut){
 
     //Parse time
     dt.time =
-        dt.createdTime
+        dt.createdTime.toDate()
         .toLocaleTimeString()
         .replace(/:.. /,' ');
 
     //Do we need to add a Date
-    let dtDate = dt.createdTime.toLocaleDateString();
+    let dtDate = dt.createdTime.toDate().toLocaleDateString();
     if ((messages.length == 0) ||
         (dtDate != messages[messages.length-1]
-         .createdTime.toLocaleDateString()))
+         .createdTime.toDate().toLocaleDateString()))
     {
         let today = new Date();
         let yesterday = new Date();

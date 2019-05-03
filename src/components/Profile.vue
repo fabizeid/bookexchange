@@ -477,7 +477,7 @@ function loadDb (vm) {
     let setReactive = vm.$set;//vue set api
     let unsubscribeBorrowed = db.collection("books").where("borrowerID", "==", uid)
 	.onSnapshot(function(snapshot) {
-            snapshot.docChanges.forEach(function(change) {
+            snapshot.docChanges().forEach(function(change) {
 		let dt = change.doc.data();
 		let key = change.doc.id;
                 dt.key = key;
@@ -503,7 +503,7 @@ function loadDb (vm) {
         });
     let unsubscribeTransaction = db.collection("transaction").where("ownerID", "==", uid)
 	.onSnapshot(function(snapshot) {
-            snapshot.docChanges.forEach(function(change) {
+            snapshot.docChanges().forEach(function(change) {
 		let dt = change.doc.data();
                 let bookKey = dt.bookID;
 		if (change.type === "added") {
