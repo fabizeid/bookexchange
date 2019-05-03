@@ -11,14 +11,14 @@
 
       <b-collapse is-nav id="nav_collapse">
 
-	<b-nav is-nav-bar>
+	<b-navbar-nav>
 	  <b-nav-item  to="/" exact>Home</b-nav-item>
 	  <b-nav-item  to="/library" exact>Browse</b-nav-item>
 	  <transition name="fade">
 	    <b-nav-item  v-if="rootData.signedIn" to="/profile" exact>Profile</b-nav-item>
 	  </transition>
           <LoginButton></LoginButton>
-	</b-nav>
+	</b-navbar-nav>
       </b-collapse>
     </b-navbar>
     <div class="my-4 pb-3"/>

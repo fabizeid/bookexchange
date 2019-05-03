@@ -14,16 +14,16 @@ Vue.config.productionTip = false
 
 
 /*  Bug which causes warning in Bootstrap workaround */
-let originalVueComponent = Vue.component
-Vue.component = function(name, definition) {
-  if (name === 'bFormCheckboxGroup' || name === 'bCheckboxGroup' ||
-      name === 'bCheckGroup' || name === 'bFormRadioGroup') {
-    definition.components = {bFormCheckbox: definition.components[0]}
-  }
-  originalVueComponent.apply(this, [name, definition])
-}
+//let originalVueComponent = Vue.component
+//Vue.component = function(name, definition) {
+//  if (name === 'bFormCheckboxGroup' || name === 'bCheckboxGroup' ||
+//      name === 'bCheckGroup' || name === 'bFormRadioGroup') {
+//    definition.components = {bFormCheckbox: definition.components[0]}
+//  }
+//  originalVueComponent.apply(this, [name, definition])
+//}
 Vue.use(BootstrapVue)
-Vue.component = originalVueComponent
+//Vue.component = originalVueComponent
 /* End workaround*/
 
 // Vue.use(VueFire)

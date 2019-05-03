@@ -10,6 +10,16 @@
 cd directory
 git clone https://github.com/fabizeid/bookexchange.git 
 
+git config --list
+
+# bootstrap should be installed as dep of bootstrap vue
+# check under bootstrap vue/node modules if not installed
+# cd to bootstrap-vue and npm install bootstrap
+
+#find outdated packages
+npm outdated
+sudo npm install package --save-dev
+
 sudo npm install -g firebase-tools
 
 # install dependencies
